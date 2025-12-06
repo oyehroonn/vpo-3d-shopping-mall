@@ -184,14 +184,31 @@ const FrameSequence = () => {
         )}
       </div>
 
-      {/* Content after animation */}
-      <section className="flex min-h-screen items-center justify-center bg-background">
-        <div className="container mx-auto px-6 text-center">
-          <h2 className="mb-6 text-4xl font-light tracking-tight text-foreground md:text-6xl">
-            The journey continues
-          </h2>
-          <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
-            Scroll down to discover more
+      {/* Hero title overlay */}
+      <section className="relative min-h-screen bg-background grain-overlay flex items-center justify-center overflow-hidden">
+        {/* Large typography background */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
+          <div className="relative">
+            <h1 className="text-[15vw] font-serif font-light leading-none text-foreground tracking-tighter">
+              VIRTUAL
+            </h1>
+            <h1 className="text-[12vw] font-serif italic font-light leading-none text-foreground -mt-[3vw] ml-[10vw]">
+              Premium
+            </h1>
+            <h1 className="text-[15vw] font-serif font-light leading-none text-foreground/20 tracking-tighter -mt-[2vw]">
+              OUTLETS
+            </h1>
+          </div>
+        </div>
+
+        {/* Small editorial caption - bottom right */}
+        <div className="absolute bottom-12 right-12 max-w-xs border-l border-border/40 pl-6">
+          <div className="flex items-center gap-2 mb-4">
+            <span className="w-2 h-2 rounded-full bg-foreground" />
+            <span className="text-xs tracking-[0.2em] text-muted-foreground font-sans">VOLUME 01: THE AVENUE</span>
+          </div>
+          <p className="text-base font-serif text-foreground/80 leading-relaxed">
+            Where the tangible weight of luxury meets the boundless nature of the digital realm. Walk the streets.
           </p>
         </div>
       </section>
