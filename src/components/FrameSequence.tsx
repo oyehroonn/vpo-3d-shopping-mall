@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import heroSilhouette from "@/assets/hero-silhouette-bg.jpg";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -184,22 +185,31 @@ const FrameSequence = () => {
         )}
       </div>
 
-      {/* Hero title overlay - vintage textured background */}
-      <section className="relative min-h-screen bg-vpo-grain grain-overlay flex items-center justify-center overflow-hidden">
+      {/* Hero title overlay - vintage textured background with silhouette */}
+      <section className="relative min-h-screen bg-vpo-grain overflow-hidden">
+        {/* Background silhouette image */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-60"
+          style={{ backgroundImage: `url(${heroSilhouette})` }}
+        />
+        
+        {/* Grain overlay */}
+        <div className="absolute inset-0 grain-overlay" />
+        
         {/* Large overlapping editorial typography - centered */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none px-4">
           <div className="relative flex flex-col items-start">
             {/* VIRTUAL - large white bold sans-serif */}
-            <h1 className="text-[22vw] md:text-[18vw] lg:text-[16vw] font-sans font-bold leading-[0.8] text-foreground tracking-[-0.03em] uppercase">
+            <h1 className="text-[20vw] md:text-[17vw] lg:text-[15vw] font-sans font-bold leading-[0.85] text-foreground tracking-[-0.02em] uppercase">
               VIRTUAL
             </h1>
             {/* Premium - italic serif, overlapping into VIRTUAL from the left */}
-            <h1 className="text-[18vw] md:text-[14vw] lg:text-[12vw] font-serif italic font-normal leading-[0.85] text-foreground/90 -mt-[12vw] md:-mt-[9vw] lg:-mt-[8vw] ml-[2vw]">
+            <h1 className="text-[16vw] md:text-[13vw] lg:text-[11vw] font-serif italic font-normal leading-[0.9] text-foreground/85 -mt-[10vw] md:-mt-[8vw] lg:-mt-[7vw] ml-[1vw]">
               Premium
             </h1>
             {/* OUTLETS - outlined/stroke ghost text below */}
             <h1 
-              className="text-[22vw] md:text-[18vw] lg:text-[16vw] font-sans font-bold leading-[0.8] tracking-[-0.03em] uppercase -mt-[5vw] md:-mt-[4vw] lg:-mt-[3vw] text-stroke-outline"
+              className="text-[20vw] md:text-[17vw] lg:text-[15vw] font-sans font-bold leading-[0.85] tracking-[-0.02em] uppercase -mt-[4vw] md:-mt-[3vw] lg:-mt-[2.5vw] text-stroke-outline"
             >
               OUTLETS
             </h1>
