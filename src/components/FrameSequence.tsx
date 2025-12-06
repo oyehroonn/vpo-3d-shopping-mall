@@ -23,7 +23,7 @@ const FrameSequence = () => {
       const imagePromises: Promise<HTMLImageElement>[] = [];
 
       for (let i = 1; i <= TOTAL_FRAMES; i++) {
-        const promise = new Promise<HTMLImageElement>((resolve, reject) => {
+        const promise = new Promise<HTMLImageElement | null>((resolve) => {
           const img = new Image();
           const frameUrl = `${FRAME_BASE_URL}${i}.jpg`;
           img.crossOrigin = "anonymous";
@@ -34,21 +34,21 @@ const FrameSequence = () => {
             resolve(img);
           };
           img.onerror = () => {
-            setLoadLog((prev) => [...prev.slice(-9), `✗ Failed frame${i}.jpg`]);
-            reject(new Error(`Failed to load ${frameUrl}`));
+            setLoadedCount((prev) => prev + 1);
+            setLoadLog((prev) => [...prev.slice(-9), `✗ Skipped frame${i}.jpg`]);
+            resolve(null); // Skip failed frames instead of rejecting
           };
           img.src = frameUrl;
         });
         imagePromises.push(promise);
       }
 
-      try {
-        const loadedImages = await Promise.all(imagePromises);
-        setImages(loadedImages);
-        setIsLoading(false);
-      } catch (error) {
-        console.error("Error loading images:", error);
-      }
+      const loadedImages = await Promise.all(imagePromises);
+      // Filter out null (failed) images
+      const validImages = loadedImages.filter((img): img is HTMLImageElement => img !== null);
+      setImages(validImages);
+      setIsLoading(false);
+      console.log(`Loaded ${validImages.length}/${TOTAL_FRAMES} frames successfully`);
     };
 
     loadImages();
