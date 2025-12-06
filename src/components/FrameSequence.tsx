@@ -13,6 +13,8 @@ const FrameSequence = () => {
   const [images, setImages] = useState<HTMLImageElement[]>([]);
   const [loadedCount, setLoadedCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [currentLoadingFrame, setCurrentLoadingFrame] = useState("");
+  const [loadLog, setLoadLog] = useState<string[]>([]);
   const frameIndexRef = useRef({ value: 0 });
 
   // Preload all images
@@ -23,13 +25,19 @@ const FrameSequence = () => {
       for (let i = 1; i <= TOTAL_FRAMES; i++) {
         const promise = new Promise<HTMLImageElement>((resolve, reject) => {
           const img = new Image();
+          const frameUrl = `${FRAME_BASE_URL}${i}.jpg`;
           img.crossOrigin = "anonymous";
+          setCurrentLoadingFrame(frameUrl);
           img.onload = () => {
             setLoadedCount((prev) => prev + 1);
+            setLoadLog((prev) => [...prev.slice(-9), `✓ Loaded frame${i}.jpg`]);
             resolve(img);
           };
-          img.onerror = reject;
-          img.src = `${FRAME_BASE_URL}${i}.jpg`;
+          img.onerror = () => {
+            setLoadLog((prev) => [...prev.slice(-9), `✗ Failed frame${i}.jpg`]);
+            reject(new Error(`Failed to load ${frameUrl}`));
+          };
+          img.src = frameUrl;
         });
         imagePromises.push(promise);
       }
@@ -130,7 +138,7 @@ const FrameSequence = () => {
         className="relative h-screen w-full overflow-hidden bg-background"
       >
         {isLoading ? (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-6">
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
             <div className="relative h-1 w-64 overflow-hidden rounded-full bg-muted">
               <div
                 className="absolute inset-y-0 left-0 bg-foreground transition-all duration-300 ease-out"
@@ -138,8 +146,20 @@ const FrameSequence = () => {
               />
             </div>
             <p className="font-mono text-sm text-muted-foreground">
-              Loading frames... {loadingProgress}%
+              Loading frames... {loadedCount}/{TOTAL_FRAMES} ({loadingProgress}%)
             </p>
+            <p className="font-mono text-xs text-muted-foreground/60 max-w-md truncate">
+              {currentLoadingFrame}
+            </p>
+            <div className="mt-4 w-80 h-48 overflow-y-auto rounded bg-muted/30 p-3 font-mono text-xs text-muted-foreground">
+              <p className="text-foreground/80 mb-2">Debug Log:</p>
+              {loadLog.map((log, i) => (
+                <p key={i} className={log.startsWith("✓") ? "text-green-500" : "text-red-500"}>
+                  {log}
+                </p>
+              ))}
+              {loadLog.length === 0 && <p className="text-muted-foreground/50">Starting...</p>}
+            </div>
           </div>
         ) : (
           <canvas
