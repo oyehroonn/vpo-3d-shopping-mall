@@ -2,11 +2,14 @@ import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import vpoHeroBg from "@/assets/vpo-hero-bg.jpeg";
+import VersionSelector from "./VersionSelector";
 
 gsap.registerPlugin(ScrollTrigger);
 
 const TOTAL_FRAMES = 226;
 const FRAME_BASE_URL = "https://dev.heyharoon.io/frames1/samples_frames/frame";
+
+type ViewMode = 'select' | 'premium' | 'lite';
 
 const FrameSequence = () => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -17,13 +20,30 @@ const FrameSequence = () => {
   const [currentLoadingFrame, setCurrentLoadingFrame] = useState("");
   const [loadLog, setLoadLog] = useState<string[]>([]);
   const [failedFrames, setFailedFrames] = useState<number[]>([]);
+  const [viewMode, setViewMode] = useState<ViewMode>('select');
   const frameIndexRef = useRef({ value: 0 });
 
-  // Preload all images with batching for better performance
+  // Handle version selection
+  const handleVersionSelect = (version: 'premium' | 'lite') => {
+    setViewMode(version);
+    if (version === 'lite') {
+      setIsLoading(false);
+    }
+  };
+
+  // Preload all images with batching for better performance (only in premium mode)
   useEffect(() => {
+    if (viewMode !== 'premium') return;
+    
     const loadImages = async () => {
       const imageArray: (HTMLImageElement | null)[] = new Array(TOTAL_FRAMES).fill(null);
       const failed: number[] = [];
+      
+      setLoadLog([`Starting to load ${TOTAL_FRAMES} frames...`]);
+      console.log(`\n========== STARTING FRAME LOAD ==========`);
+      console.log(`Total frames to load: ${TOTAL_FRAMES}`);
+      console.log(`Base URL: ${FRAME_BASE_URL}`);
+      console.log(`=========================================\n`);
       
       // Load in batches for better performance
       const BATCH_SIZE = 10;
@@ -44,7 +64,7 @@ const FrameSequence = () => {
             img.onload = () => {
               imageArray[i] = img;
               setLoadedCount((prev) => prev + 1);
-              setLoadLog((prev) => [...prev.slice(-19), `✓ frame${frameNum}.jpg loaded`]);
+              setLoadLog((prev) => [...prev.slice(-19), `✓ frame${frameNum}.jpg loaded successfully`]);
               console.log(`✓ Loaded frame${frameNum}.jpg`);
               resolve();
             };
@@ -53,7 +73,7 @@ const FrameSequence = () => {
               failed.push(frameNum);
               setLoadedCount((prev) => prev + 1);
               setFailedFrames((prev) => [...prev, frameNum]);
-              setLoadLog((prev) => [...prev.slice(-19), `✗ frame${frameNum}.jpg failed`]);
+              setLoadLog((prev) => [...prev.slice(-19), `✗ frame${frameNum}.jpg FAILED to load`]);
               console.warn(`✗ Failed to load frame${frameNum}.jpg`);
               resolve();
             };
@@ -74,17 +94,25 @@ const FrameSequence = () => {
       console.log(`\n========== FRAME LOADING COMPLETE ==========`);
       console.log(`✓ Successfully loaded: ${validImages.length}/${TOTAL_FRAMES} frames`);
       if (failed.length > 0) {
-        console.log(`✗ Failed frames: ${failed.join(', ')}`);
+        console.log(`✗ Failed frames (${failed.length}): ${failed.join(', ')}`);
       }
       console.log(`=============================================\n`);
+      
+      setLoadLog((prev) => [
+        ...prev,
+        ``,
+        `========== LOADING COMPLETE ==========`,
+        `✓ Loaded: ${validImages.length}/${TOTAL_FRAMES}`,
+        failed.length > 0 ? `✗ Failed: ${failed.length} frames` : `✓ No failed frames!`,
+      ]);
     };
 
     loadImages();
-  }, []);
+  }, [viewMode]);
 
-  // Setup GSAP animation after images load
+  // Setup GSAP animation after images load (premium mode only)
   useEffect(() => {
-    if (isLoading || images.length === 0) return;
+    if (viewMode !== 'premium' || isLoading || images.length === 0) return;
 
     const canvas = canvasRef.current;
     const container = containerRef.current;
@@ -138,13 +166,13 @@ const FrameSequence = () => {
         start: "top top",
         end: "+=300%",
         pin: true,
-        scrub: 1, // Smoother scrubbing
+        scrub: 1,
         anticipatePin: 1,
       },
     });
 
     tl.to(frameIndexRef.current, {
-      value: images.length - 1, // Use actual loaded count
+      value: images.length - 1,
       ease: "none",
       onUpdate: () => {
         renderFrame(Math.round(frameIndexRef.current.value));
@@ -155,10 +183,30 @@ const FrameSequence = () => {
       window.removeEventListener("resize", resizeCanvas);
       ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
     };
-  }, [isLoading, images]);
+  }, [viewMode, isLoading, images]);
 
   const loadingProgress = Math.round((loadedCount / TOTAL_FRAMES) * 100);
 
+  // Show version selector
+  if (viewMode === 'select') {
+    return <VersionSelector onSelect={handleVersionSelect} />;
+  }
+
+  // Lite mode - skip directly to hero section
+  if (viewMode === 'lite') {
+    return (
+      <section 
+        className="relative min-h-screen flex items-center justify-center overflow-hidden"
+        style={{
+          backgroundImage: `url(${vpoHeroBg})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
+      />
+    );
+  }
+
+  // Premium mode
   return (
     <>
       <div
@@ -167,6 +215,12 @@ const FrameSequence = () => {
       >
         {isLoading ? (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-background">
+            <div className="grain-overlay" />
+            
+            <h2 className="font-display text-xl tracking-[0.3em] text-foreground mb-4">
+              LOADING PREMIUM EXPERIENCE
+            </h2>
+            
             <div className="relative h-1 w-64 overflow-hidden rounded-full bg-muted">
               <div
                 className="absolute inset-y-0 left-0 bg-foreground transition-all duration-150 ease-out"
@@ -179,20 +233,31 @@ const FrameSequence = () => {
             <p className="font-mono text-xs text-muted-foreground/60">
               Current: {currentLoadingFrame}
             </p>
-            <div className="mt-4 w-96 h-64 overflow-y-auto rounded bg-muted/30 p-3 font-mono text-xs">
-              <p className="text-foreground/80 mb-2 font-semibold">Frame Loading Log:</p>
-              <div className="space-y-0.5">
+            
+            {/* Frame loading log */}
+            <div className="mt-4 w-[500px] max-w-[90vw] h-72 overflow-y-auto rounded border border-foreground/10 bg-muted/20 p-4 font-mono text-xs">
+              <p className="text-foreground/80 mb-3 font-semibold tracking-wider">FRAME LOADING LOG:</p>
+              <div className="space-y-1">
                 {loadLog.map((log, i) => (
-                  <p key={i} className={log.startsWith("✓") ? "text-green-500" : "text-red-500"}>
+                  <p 
+                    key={i} 
+                    className={
+                      log.startsWith("✓") ? "text-green-500" : 
+                      log.startsWith("✗") ? "text-red-500" : 
+                      log.includes("===") ? "text-foreground/60 font-semibold mt-2" :
+                      "text-muted-foreground"
+                    }
+                  >
                     {log}
                   </p>
                 ))}
                 {loadLog.length === 0 && <p className="text-muted-foreground/50">Initializing...</p>}
               </div>
             </div>
+            
             {failedFrames.length > 0 && (
-              <p className="font-mono text-xs text-red-400">
-                Failed: {failedFrames.length} frames
+              <p className="font-mono text-xs text-red-400 mt-2">
+                ✗ Failed frames: {failedFrames.length} (will be skipped)
               </p>
             )}
           </div>
@@ -202,14 +267,6 @@ const FrameSequence = () => {
             <p className="font-mono text-sm text-muted-foreground max-w-md text-center">
               Unable to load frames. Check console for details.
             </p>
-            <div className="mt-4 w-96 h-64 overflow-y-auto rounded bg-muted/30 p-3 font-mono text-xs">
-              <p className="text-foreground/80 mb-2 font-semibold">Debug Log:</p>
-              {loadLog.map((log, i) => (
-                <p key={i} className={log.startsWith("✓") ? "text-green-500" : "text-red-500"}>
-                  {log}
-                </p>
-              ))}
-            </div>
           </div>
         ) : (
           <canvas
@@ -220,14 +277,16 @@ const FrameSequence = () => {
       </div>
 
       {/* Hero section with background image */}
-      <section 
-        className="relative min-h-screen flex items-center justify-center overflow-hidden"
-        style={{
-          backgroundImage: `url(${vpoHeroBg})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        }}
-      />
+      {!isLoading && images.length > 0 && (
+        <section 
+          className="relative min-h-screen flex items-center justify-center overflow-hidden"
+          style={{
+            backgroundImage: `url(${vpoHeroBg})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+        />
+      )}
     </>
   );
 };
