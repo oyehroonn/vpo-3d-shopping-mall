@@ -5,7 +5,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 gsap.registerPlugin(ScrollTrigger);
 
 const TOTAL_FRAMES = 226;
-const FRAME_BASE_URL = "http://dev.heyharoon.io/frames1/samples_frames/frame";
+const FRAME_BASE_URL = "https://dev.heyharoon.io/frames1/samples_frames/frame";
 
 const FrameSequence = () => {
   const containerRef = useRef<HTMLDivElement>(null);
