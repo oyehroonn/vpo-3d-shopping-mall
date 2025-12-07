@@ -115,8 +115,8 @@ const FrameSequenceScene2 = () => {
     resizeCanvas();
     window.addEventListener("resize", resizeCanvas);
 
-    // Calculate exact scroll distance based on frame count
-    const scrollPerFrame = 8;
+    // Calculate scroll distance - reduced to minimize extra padding after animation
+    const scrollPerFrame = 4;
     const totalScrollDistance = images.length * scrollPerFrame;
 
     const tl = gsap.timeline({
