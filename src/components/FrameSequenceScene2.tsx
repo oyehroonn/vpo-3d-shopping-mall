@@ -4,7 +4,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const TOTAL_FRAMES = 390; // Reduced from 400 - last 10 frames are empty/black
+const TOTAL_FRAMES = 250;
 const FRAME_BASE_URL = "https://dev.heyharoon.io/scene2/samples_frames/frame";
 
 const FrameSequenceScene2 = () => {
