@@ -4,7 +4,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const TOTAL_FRAMES = 400;
+const TOTAL_FRAMES = 394; // Reduced from 400 - last 6 frames are empty/black
 const FRAME_BASE_URL = "https://dev.heyharoon.io/scene2/samples_frames/frame";
 
 const FrameSequenceScene2 = () => {
@@ -115,15 +115,23 @@ const FrameSequenceScene2 = () => {
     resizeCanvas();
     window.addEventListener("resize", resizeCanvas);
 
+    // Calculate exact scroll distance based on frame count
+    const scrollPerFrame = 8;
+    const totalScrollDistance = images.length * scrollPerFrame;
+
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: container,
         start: "top top",
-        end: "+=300%",
+        end: `+=${totalScrollDistance}`,
         pin: true,
-        pinSpacing: false,
-        scrub: 0.5,
+        pinSpacing: true,
+        scrub: 0.3,
         anticipatePin: 1,
+        onLeave: () => {
+          // Ensure last frame stays visible when animation ends
+          renderFrame(images.length - 1);
+        },
       },
     });
 
