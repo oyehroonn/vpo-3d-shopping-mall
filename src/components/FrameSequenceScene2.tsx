@@ -115,18 +115,14 @@ const FrameSequenceScene2 = () => {
     resizeCanvas();
     window.addEventListener("resize", resizeCanvas);
 
-    // Calculate exact scroll distance based on frame count
-    const scrollPerFrame = 10; // pixels per frame
-    const totalScrollDistance = images.length * scrollPerFrame;
-
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: container,
         start: "top top",
-        end: `+=${totalScrollDistance}`,
+        end: "+=300%",
         pin: true,
-        pinSpacing: "margin",
-        scrub: 0.3,
+        pinSpacing: false,
+        scrub: 0.5,
         anticipatePin: 1,
       },
     });
