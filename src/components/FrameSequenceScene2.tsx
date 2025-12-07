@@ -119,9 +119,10 @@ const FrameSequenceScene2 = () => {
       scrollTrigger: {
         trigger: container,
         start: "top top",
-        end: "+=400%",
+        end: "+=300%",
         pin: true,
-        scrub: 1,
+        pinSpacing: true,
+        scrub: 0.5,
         anticipatePin: 1,
       },
     });
