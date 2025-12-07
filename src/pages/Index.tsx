@@ -1,4 +1,5 @@
 import FrameSequence from "@/components/FrameSequence";
+import FrameSequenceScene2 from "@/components/FrameSequenceScene2";
 import TopTicker from "@/components/vpo/TopTicker";
 import Navigation from "@/components/vpo/Navigation";
 import ManifestoSection from "@/components/vpo/ManifestoSection";
@@ -16,6 +17,7 @@ const Index = () => {
       <ManifestoSection />
       <SpacesSection />
       <CurrentSelectionSection />
+      <FrameSequenceScene2 />
       <QuoteSection />
       <Footer />
     </main>
