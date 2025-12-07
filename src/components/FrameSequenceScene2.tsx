@@ -129,8 +129,16 @@ const FrameSequenceScene2 = () => {
         scrub: 0.3,
         anticipatePin: 1,
         onLeave: () => {
-          // Ensure last frame stays visible when animation ends
           renderFrame(images.length - 1);
+        },
+        onLeaveBack: () => {
+          renderFrame(0);
+        },
+        onEnterBack: () => {
+          renderFrame(images.length - 1);
+        },
+        onRefresh: () => {
+          renderFrame(Math.round(frameIndexRef.current.value));
         },
       },
     });
