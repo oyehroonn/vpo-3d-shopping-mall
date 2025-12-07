@@ -115,9 +115,12 @@ const FrameSequenceScene2 = () => {
     resizeCanvas();
     window.addEventListener("resize", resizeCanvas);
 
-    // Calculate scroll distance - reduced to minimize extra padding after animation
-    const scrollPerFrame = 4;
+    // Calculate scroll distance - minimal padding after animation
+    const scrollPerFrame = 8;
     const totalScrollDistance = images.length * scrollPerFrame;
+
+    // Render first frame immediately
+    renderFrame(0);
 
     const tl = gsap.timeline({
       scrollTrigger: {
@@ -125,8 +128,8 @@ const FrameSequenceScene2 = () => {
         start: "top top",
         end: `+=${totalScrollDistance}`,
         pin: true,
-        pinSpacing: true,
-        scrub: 0.3,
+        pinSpacing: false,
+        scrub: 0.5,
         anticipatePin: 1,
         onLeave: () => {
           renderFrame(images.length - 1);
