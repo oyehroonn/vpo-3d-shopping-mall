@@ -7,12 +7,14 @@ interface ExperienceContainerProps {
   className?: string;
   showLabel?: boolean;
   labelText?: string;
+  isPrimary?: boolean; // Only the first/primary container loads frames
 }
 
 const ExperienceContainer = ({ 
   className = "", 
   showLabel = true,
-  labelText = "Store Interior"
+  labelText = "Store Interior",
+  isPrimary = false
 }: ExperienceContainerProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -23,8 +25,13 @@ const ExperienceContainer = ({
   const frameIndexRef = useRef(0);
   const imagesRef = useRef<HTMLImageElement[]>([]);
 
-  // Preload all images
+  // Preload all images - ONLY for primary container
   useEffect(() => {
+    if (!isPrimary) {
+      setIsLoading(false);
+      return;
+    }
+
     const loadImages = async () => {
       const imageArray: (HTMLImageElement | null)[] = new Array(TOTAL_FRAMES).fill(null);
       const BATCH_SIZE = 15;
@@ -67,9 +74,11 @@ const ExperienceContainer = ({
     };
 
     loadImages();
-  }, []);
+  }, [isPrimary]);
 
   const renderFrame = useCallback((index: number) => {
+    if (!isPrimary) return;
+    
     const canvas = canvasRef.current;
     const container = containerRef.current;
     if (!canvas || !container) return;
@@ -104,11 +113,11 @@ const ExperienceContainer = ({
     }
 
     ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
-  }, []);
+  }, [isPrimary]);
 
-  // Setup canvas and wheel-based animation
+  // Setup canvas and wheel-based animation - ONLY for primary
   useEffect(() => {
-    if (isLoading || images.length === 0) return;
+    if (!isPrimary || isLoading || images.length === 0) return;
 
     const canvas = canvasRef.current;
     const container = containerRef.current;
@@ -128,10 +137,12 @@ const ExperienceContainer = ({
     return () => {
       window.removeEventListener("resize", resizeCanvas);
     };
-  }, [isLoading, images, renderFrame]);
+  }, [isPrimary, isLoading, images, renderFrame]);
 
-  // Wheel event handler - only active when hovering
+  // Wheel event handler - only active when hovering AND primary
   useEffect(() => {
+    if (!isPrimary) return;
+    
     const container = containerRef.current;
     if (!container || isLoading || images.length === 0) return;
 
@@ -158,10 +169,12 @@ const ExperienceContainer = ({
     return () => {
       container.removeEventListener("wheel", handleWheel);
     };
-  }, [isHovering, isLoading, images, renderFrame]);
+  }, [isPrimary, isHovering, isLoading, images, renderFrame]);
 
-  // Touch event handler for mobile
+  // Touch event handler for mobile - ONLY for primary
   useEffect(() => {
+    if (!isPrimary) return;
+    
     const container = containerRef.current;
     if (!container || isLoading || images.length === 0) return;
 
@@ -195,10 +208,59 @@ const ExperienceContainer = ({
       container.removeEventListener("touchstart", handleTouchStart);
       container.removeEventListener("touchmove", handleTouchMove);
     };
-  }, [isLoading, images, renderFrame]);
+  }, [isPrimary, isLoading, images, renderFrame]);
 
   const loadingProgress = Math.round((loadedCount / TOTAL_FRAMES) * 100);
 
+  // Static placeholder for non-primary containers
+  if (!isPrimary) {
+    return (
+      <div 
+        ref={containerRef}
+        className={`relative overflow-hidden ${className}`}
+        style={{
+          background: "linear-gradient(135deg, hsl(38 12% 94%) 0%, hsl(35 10% 91%) 100%)"
+        }}
+      >
+        {/* Subtle inner border for gallery frame effect */}
+        <div className="absolute inset-3 md:inset-5 border border-[hsl(30_8%_70%/0.3)] pointer-events-none z-10" />
+        
+        {/* Corner accents */}
+        <div className="absolute top-3 left-3 md:top-5 md:left-5 w-4 h-4 border-t border-l border-[hsl(30_8%_50%/0.4)] pointer-events-none z-10" />
+        <div className="absolute top-3 right-3 md:top-5 md:right-5 w-4 h-4 border-t border-r border-[hsl(30_8%_50%/0.4)] pointer-events-none z-10" />
+        <div className="absolute bottom-3 left-3 md:bottom-5 md:left-5 w-4 h-4 border-b border-l border-[hsl(30_8%_50%/0.4)] pointer-events-none z-10" />
+        <div className="absolute bottom-3 right-3 md:bottom-5 md:right-5 w-4 h-4 border-b border-r border-[hsl(30_8%_50%/0.4)] pointer-events-none z-10" />
+
+        {showLabel && (
+          <div className="absolute top-6 left-6 md:top-8 md:left-8 z-20 flex items-center gap-3">
+            <span className="font-sans text-[11px] tracking-[0.15em] text-[hsl(30_8%_25%)] uppercase font-medium">
+              {labelText}
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[hsl(30_8%_60%)]" />
+              <span className="text-[9px] font-sans tracking-[0.2em] text-[hsl(30_8%_50%)] uppercase">
+                Standby
+              </span>
+            </span>
+          </div>
+        )}
+
+        {/* Static placeholder content */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-6">
+          <div className="w-12 h-px bg-[hsl(30_8%_75%)]" />
+          <p className="font-serif text-lg md:text-xl italic text-[hsl(30_8%_45%)] text-center px-8">
+            Premium experience available above
+          </p>
+          <p className="font-sans text-[10px] tracking-[0.3em] text-[hsl(30_8%_55%)] uppercase">
+            Scroll to Section 01
+          </p>
+          <div className="w-12 h-px bg-[hsl(30_8%_75%)]" />
+        </div>
+      </div>
+    );
+  }
+
+  // Primary container with full experience
   return (
     <div 
       ref={containerRef}

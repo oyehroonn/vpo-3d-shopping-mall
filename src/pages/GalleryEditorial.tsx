@@ -46,6 +46,7 @@ const GalleryEditorial = () => {
           <ExperienceContainer 
             className="h-[55vh] lg:h-auto"
             labelText="Store Interior"
+            isPrimary={true}
           />
           <div 
             style={{
