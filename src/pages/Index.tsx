@@ -10,7 +10,7 @@ import Footer from "@/components/vpo/Footer";
 
 const Index = () => {
   return (
-    <main className="bg-background">
+    <main className="bg-background overflow-hidden">
       <TopTicker />
       <Navigation />
       <FrameSequence />

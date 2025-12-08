@@ -1,6 +1,6 @@
 const Footer = () => {
   return (
-    <footer className="bg-background grain-overlay pt-24 pb-16 px-8 md:px-16">
+    <footer className="relative z-20 bg-background grain-overlay pt-24 pb-16 px-8 md:px-16 overflow-hidden">
       <div className="max-w-7xl mx-auto">
         {/* Main footer content */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-16 mb-24">
