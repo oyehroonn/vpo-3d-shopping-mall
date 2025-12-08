@@ -140,6 +140,7 @@ const ExperienceContainer = ({
   }, [isPrimary, isLoading, images, renderFrame]);
 
   // Wheel event handler - only active when hovering AND primary
+  // Allows normal scrolling when animation reaches boundaries
   useEffect(() => {
     if (!isPrimary) return;
     
@@ -149,16 +150,30 @@ const ExperienceContainer = ({
     const handleWheel = (e: WheelEvent) => {
       if (!isHovering) return;
       
+      const delta = e.deltaY;
+      const currentFrame = frameIndexRef.current;
+      const maxFrame = images.length - 1;
+      
+      // Allow normal scroll if at the end and scrolling down
+      if (currentFrame >= maxFrame && delta > 0) {
+        return; // Don't prevent default - let page scroll
+      }
+      
+      // Allow normal scroll if at the beginning and scrolling up
+      if (currentFrame <= 0 && delta < 0) {
+        return; // Don't prevent default - let page scroll
+      }
+      
+      // Otherwise, capture the scroll for animation
       e.preventDefault();
       e.stopPropagation();
       
-      const delta = e.deltaY;
       const sensitivity = 0.5;
       const frameChange = Math.sign(delta) * Math.max(1, Math.abs(delta) * sensitivity / 50);
       
       frameIndexRef.current = Math.min(
-        Math.max(frameIndexRef.current + frameChange, 0),
-        images.length - 1
+        Math.max(currentFrame + frameChange, 0),
+        maxFrame
       );
       
       renderFrame(Math.round(frameIndexRef.current));
