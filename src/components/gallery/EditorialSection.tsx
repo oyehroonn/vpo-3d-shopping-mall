@@ -24,37 +24,39 @@ const EditorialSection = ({
   className = "",
 }: EditorialSectionProps) => {
   return (
-    <div className={`flex flex-col justify-center h-full px-8 md:px-16 lg:px-20 py-16 ${className}`}>
+    <div className={`flex flex-col justify-center h-full px-10 md:px-16 lg:px-24 py-20 md:py-24 ${className}`}>
       {/* Section Label */}
-      <p className="font-sans text-xs tracking-[0.25em] text-muted-foreground/60 uppercase mb-8">
+      <p className="font-sans text-[11px] tracking-[0.35em] text-[hsl(30_6%_45%)] uppercase mb-10 md:mb-14">
         {sectionNumber} — {sectionLabel}
       </p>
 
       {/* Headline */}
-      <h2 className="font-serif text-4xl md:text-5xl lg:text-6xl font-normal leading-[1.1] text-light mb-2">
+      <h2 className="font-serif text-[2.75rem] md:text-[3.5rem] lg:text-[4.5rem] font-light leading-[0.95] tracking-[-0.02em] text-[hsl(30_10%_15%)] mb-1">
         {headline}
       </h2>
-      <h2 className="font-serif text-4xl md:text-5xl lg:text-6xl font-normal italic leading-[1.1] text-light/80 mb-10">
+      <h2 className="font-serif text-[2.75rem] md:text-[3.5rem] lg:text-[4.5rem] font-light italic leading-[0.95] tracking-[-0.01em] text-[hsl(30_8%_30%)] mb-12 md:mb-16">
         {headlineItalic}.
       </h2>
 
-      {/* Divider */}
-      <div className="w-12 h-px bg-muted-foreground/30 mb-8" />
+      {/* Elegant Divider */}
+      <div className="w-16 h-[1px] bg-gradient-to-r from-[hsl(30_8%_60%)] to-transparent mb-10 md:mb-12" />
 
       {/* Description */}
-      <p className="font-sans text-base md:text-lg leading-relaxed text-light/70 max-w-md mb-8">
+      <p className="font-sans text-[15px] md:text-base leading-[1.85] text-[hsl(30_6%_35%)] max-w-[420px] mb-10 md:mb-12 font-light">
         {description}
       </p>
 
       {/* Features list */}
       {features && features.length > 0 && (
-        <div className="space-y-3 mb-10">
+        <div className="space-y-4 mb-12">
           {features.map((feature, index) => (
-            <div key={index} className="flex items-center gap-3">
-              <div className="w-4 h-4 border border-muted-foreground/30 rounded-sm flex items-center justify-center">
-                <div className="w-1.5 h-1.5 bg-muted-foreground/40 rounded-full" />
+            <div key={index} className="flex items-center gap-4">
+              <div className="w-5 h-5 border border-[hsl(30_8%_70%)] flex items-center justify-center">
+                <div className="w-1 h-1 bg-[hsl(30_8%_50%)]" />
               </div>
-              <span className="font-sans text-sm text-light/60">{feature}</span>
+              <span className="font-sans text-[13px] tracking-wide text-[hsl(30_6%_40%)] font-light">
+                {feature}
+              </span>
             </div>
           ))}
         </div>
@@ -64,12 +66,12 @@ const EditorialSection = ({
       {linkText && (
         <a 
           href={linkHref}
-          className="group inline-flex items-center gap-3 font-sans text-xs tracking-[0.2em] text-light uppercase hover:text-light/70 transition-colors"
+          className="group inline-flex items-center gap-4 mt-2"
         >
-          <span className="border-b border-light/40 pb-0.5 group-hover:border-light/20 transition-colors">
+          <span className="font-sans text-[11px] tracking-[0.25em] text-[hsl(30_10%_18%)] uppercase font-medium border-b border-[hsl(30_8%_30%)] pb-1 group-hover:border-[hsl(30_8%_50%)] transition-colors duration-300">
             {linkText}
           </span>
-          <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+          <ArrowRight className="w-4 h-4 text-[hsl(30_8%_35%)] transition-all duration-300 group-hover:translate-x-1.5 group-hover:text-[hsl(30_8%_20%)]" />
         </a>
       )}
     </div>

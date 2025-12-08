@@ -1,8 +1,4 @@
-import { useEffect, useRef, useState } from "react";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-
-gsap.registerPlugin(ScrollTrigger);
+import { useEffect, useRef, useState, useCallback } from "react";
 
 const TOTAL_FRAMES = 250;
 const FRAME_BASE_URL = "https://dev.heyharoon.io/scene2/samples_frames/frame";
@@ -23,7 +19,9 @@ const ExperienceContainer = ({
   const [images, setImages] = useState<HTMLImageElement[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadedCount, setLoadedCount] = useState(0);
-  const frameIndexRef = useRef({ value: 0 });
+  const [isHovering, setIsHovering] = useState(false);
+  const frameIndexRef = useRef(0);
+  const imagesRef = useRef<HTMLImageElement[]>([]);
 
   // Preload all images
   useEffect(() => {
@@ -64,13 +62,51 @@ const ExperienceContainer = ({
       
       const validImages = imageArray.filter((img): img is HTMLImageElement => img !== null);
       setImages(validImages);
+      imagesRef.current = validImages;
       setIsLoading(false);
     };
 
     loadImages();
   }, []);
 
-  // Setup GSAP animation after images load
+  const renderFrame = useCallback((index: number) => {
+    const canvas = canvasRef.current;
+    const container = containerRef.current;
+    if (!canvas || !container) return;
+    
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const imgs = imagesRef.current;
+    if (imgs.length === 0) return;
+
+    const frameIndex = Math.min(Math.max(index, 0), imgs.length - 1);
+    const img = imgs[frameIndex];
+    if (!img) return;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const imgRatio = img.width / img.height;
+    const canvasRatio = canvas.width / canvas.height;
+
+    let drawWidth, drawHeight, offsetX, offsetY;
+
+    if (canvasRatio > imgRatio) {
+      drawWidth = canvas.width;
+      drawHeight = canvas.width / imgRatio;
+      offsetX = 0;
+      offsetY = (canvas.height - drawHeight) / 2;
+    } else {
+      drawHeight = canvas.height;
+      drawWidth = canvas.height * imgRatio;
+      offsetX = (canvas.width - drawWidth) / 2;
+      offsetY = 0;
+    }
+
+    ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
+  }, []);
+
+  // Setup canvas and wheel-based animation
   useEffect(() => {
     if (isLoading || images.length === 0) return;
 
@@ -78,114 +114,146 @@ const ExperienceContainer = ({
     const container = containerRef.current;
     if (!canvas || !container) return;
 
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
     const resizeCanvas = () => {
       const rect = container.getBoundingClientRect();
       canvas.width = rect.width;
       canvas.height = rect.height;
-      renderFrame(Math.round(frameIndexRef.current.value));
-    };
-
-    const renderFrame = (index: number) => {
-      const frameIndex = Math.min(Math.max(index, 0), images.length - 1);
-      const img = images[frameIndex];
-      if (!img || !ctx) return;
-
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      const imgRatio = img.width / img.height;
-      const canvasRatio = canvas.width / canvas.height;
-
-      let drawWidth, drawHeight, offsetX, offsetY;
-
-      if (canvasRatio > imgRatio) {
-        drawWidth = canvas.width;
-        drawHeight = canvas.width / imgRatio;
-        offsetX = 0;
-        offsetY = (canvas.height - drawHeight) / 2;
-      } else {
-        drawHeight = canvas.height;
-        drawWidth = canvas.height * imgRatio;
-        offsetX = (canvas.width - drawWidth) / 2;
-        offsetY = 0;
-      }
-
-      ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
+      renderFrame(frameIndexRef.current);
     };
 
     resizeCanvas();
     window.addEventListener("resize", resizeCanvas);
     renderFrame(0);
 
-    const scrollPerFrame = 8;
-    const totalScrollDistance = images.length * scrollPerFrame;
-
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: container,
-        start: "top 20%",
-        end: `+=${totalScrollDistance}`,
-        scrub: 0.5,
-        onUpdate: (self) => {
-          const progress = self.progress;
-          const frameIndex = Math.round(progress * (images.length - 1));
-          frameIndexRef.current.value = frameIndex;
-          renderFrame(frameIndex);
-        },
-        onRefresh: () => {
-          renderFrame(Math.round(frameIndexRef.current.value));
-        },
-      },
-    });
-
     return () => {
       window.removeEventListener("resize", resizeCanvas);
-      ScrollTrigger.getAll().forEach((trigger) => {
-        if (trigger.vars.trigger === container) {
-          trigger.kill();
-        }
-      });
     };
-  }, [isLoading, images]);
+  }, [isLoading, images, renderFrame]);
+
+  // Wheel event handler - only active when hovering
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container || isLoading || images.length === 0) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      if (!isHovering) return;
+      
+      e.preventDefault();
+      e.stopPropagation();
+      
+      const delta = e.deltaY;
+      const sensitivity = 0.5;
+      const frameChange = Math.sign(delta) * Math.max(1, Math.abs(delta) * sensitivity / 50);
+      
+      frameIndexRef.current = Math.min(
+        Math.max(frameIndexRef.current + frameChange, 0),
+        images.length - 1
+      );
+      
+      renderFrame(Math.round(frameIndexRef.current));
+    };
+
+    container.addEventListener("wheel", handleWheel, { passive: false });
+
+    return () => {
+      container.removeEventListener("wheel", handleWheel);
+    };
+  }, [isHovering, isLoading, images, renderFrame]);
+
+  // Touch event handler for mobile
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container || isLoading || images.length === 0) return;
+
+    let lastTouchY = 0;
+
+    const handleTouchStart = (e: TouchEvent) => {
+      lastTouchY = e.touches[0].clientY;
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      e.preventDefault();
+      const currentTouchY = e.touches[0].clientY;
+      const delta = lastTouchY - currentTouchY;
+      lastTouchY = currentTouchY;
+      
+      const sensitivity = 0.3;
+      const frameChange = delta * sensitivity;
+      
+      frameIndexRef.current = Math.min(
+        Math.max(frameIndexRef.current + frameChange, 0),
+        images.length - 1
+      );
+      
+      renderFrame(Math.round(frameIndexRef.current));
+    };
+
+    container.addEventListener("touchstart", handleTouchStart, { passive: true });
+    container.addEventListener("touchmove", handleTouchMove, { passive: false });
+
+    return () => {
+      container.removeEventListener("touchstart", handleTouchStart);
+      container.removeEventListener("touchmove", handleTouchMove);
+    };
+  }, [isLoading, images, renderFrame]);
 
   const loadingProgress = Math.round((loadedCount / TOTAL_FRAMES) * 100);
 
   return (
     <div 
       ref={containerRef}
-      className={`relative bg-[hsl(var(--vpo-light-bg))] overflow-hidden ${className}`}
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
+      className={`relative overflow-hidden cursor-grab active:cursor-grabbing ${className}`}
+      style={{
+        background: "linear-gradient(135deg, hsl(38 12% 94%) 0%, hsl(35 10% 91%) 100%)"
+      }}
     >
+      {/* Subtle inner border for gallery frame effect */}
+      <div className="absolute inset-3 md:inset-5 border border-[hsl(30_8%_70%/0.3)] pointer-events-none z-10" />
+      
+      {/* Corner accents */}
+      <div className="absolute top-3 left-3 md:top-5 md:left-5 w-4 h-4 border-t border-l border-[hsl(30_8%_50%/0.4)] pointer-events-none z-10" />
+      <div className="absolute top-3 right-3 md:top-5 md:right-5 w-4 h-4 border-t border-r border-[hsl(30_8%_50%/0.4)] pointer-events-none z-10" />
+      <div className="absolute bottom-3 left-3 md:bottom-5 md:left-5 w-4 h-4 border-b border-l border-[hsl(30_8%_50%/0.4)] pointer-events-none z-10" />
+      <div className="absolute bottom-3 right-3 md:bottom-5 md:right-5 w-4 h-4 border-b border-r border-[hsl(30_8%_50%/0.4)] pointer-events-none z-10" />
+
       {showLabel && (
-        <div className="absolute top-4 left-4 z-10 flex items-center gap-2">
-          <span className="text-xs font-sans tracking-wide text-light uppercase">
+        <div className="absolute top-6 left-6 md:top-8 md:left-8 z-20 flex items-center gap-3">
+          <span className="font-sans text-[11px] tracking-[0.15em] text-[hsl(30_8%_25%)] uppercase font-medium">
             {labelText}
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-[hsl(var(--vpo-secure))]" />
-            <span className="text-[10px] font-sans tracking-widest text-[hsl(var(--vpo-secure))] uppercase">
-              Live Render
+            <span className="w-1.5 h-1.5 rounded-full bg-[hsl(145_60%_40%)] animate-pulse" />
+            <span className="text-[9px] font-sans tracking-[0.2em] text-[hsl(145_40%_35%)] uppercase">
+              Live
             </span>
           </span>
         </div>
       )}
 
+      {/* Hover indicator */}
+      <div className={`absolute bottom-6 left-1/2 -translate-x-1/2 z-20 transition-opacity duration-300 ${isHovering ? 'opacity-100' : 'opacity-0'}`}>
+        <span className="font-sans text-[9px] tracking-[0.25em] text-[hsl(30_8%_40%)] uppercase">
+          Scroll to explore
+        </span>
+      </div>
+
       {isLoading ? (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
-          <div className="relative h-0.5 w-32 overflow-hidden rounded-full bg-muted/20">
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
+          <div className="relative h-px w-40 overflow-hidden bg-[hsl(30_8%_80%)]">
             <div
-              className="absolute inset-y-0 left-0 bg-muted-foreground/40 transition-all duration-150 ease-out"
+              className="absolute inset-y-0 left-0 bg-[hsl(30_8%_40%)] transition-all duration-150 ease-out"
               style={{ width: `${loadingProgress}%` }}
             />
           </div>
-          <p className="font-sans text-[10px] tracking-widest text-muted-foreground/60 uppercase">
-            {loadingProgress}%
+          <p className="font-sans text-[10px] tracking-[0.3em] text-[hsl(30_8%_50%)] uppercase">
+            Loading Experience · {loadingProgress}%
           </p>
         </div>
       ) : images.length === 0 ? (
         <div className="absolute inset-0 flex items-center justify-center">
-          <p className="font-sans text-xs text-muted-foreground/40">Experience unavailable</p>
+          <p className="font-sans text-xs tracking-widest text-[hsl(30_8%_60%)] uppercase">Experience unavailable</p>
         </div>
       ) : (
         <canvas
