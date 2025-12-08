@@ -3,11 +3,22 @@ import { useEffect, useRef, useState, useCallback } from "react";
 const TOTAL_FRAMES = 250;
 const FRAME_BASE_URL = "https://dev.heyharoon.io/scene2/samples_frames/frame";
 
+const PREMIUM_MESSAGES = [
+  "Curating your premium experience…",
+  "Setting up the store shelves…",
+  "Polishing the marble walkways…",
+  "Perfecting the lighting in your suite…",
+  "Arranging limited-edition pieces…",
+  "Preparing the VIP entrance…",
+  "Unveiling exclusive collections…",
+  "Crafting an immersive journey…",
+];
+
 interface ExperienceContainerProps {
   className?: string;
   showLabel?: boolean;
   labelText?: string;
-  isPrimary?: boolean; // Only the first/primary container loads frames
+  isPrimary?: boolean;
 }
 
 const ExperienceContainer = ({ 
@@ -22,8 +33,20 @@ const ExperienceContainer = ({
   const [isLoading, setIsLoading] = useState(true);
   const [loadedCount, setLoadedCount] = useState(0);
   const [isHovering, setIsHovering] = useState(false);
+  const [currentMessage, setCurrentMessage] = useState(PREMIUM_MESSAGES[0]);
   const frameIndexRef = useRef(0);
   const imagesRef = useRef<HTMLImageElement[]>([]);
+
+  // Rotate premium messages during loading
+  useEffect(() => {
+    if (!isLoading || !isPrimary) return;
+    
+    const interval = setInterval(() => {
+      setCurrentMessage(PREMIUM_MESSAGES[Math.floor(Math.random() * PREMIUM_MESSAGES.length)]);
+    }, 3000);
+    
+    return () => clearInterval(interval);
+  }, [isLoading, isPrimary]);
 
   // Preload all images - ONLY for primary container
   useEffect(() => {
@@ -33,8 +56,11 @@ const ExperienceContainer = ({
     }
 
     const loadImages = async () => {
+      console.log("========== FRAME LOADING STARTED ==========");
       const imageArray: (HTMLImageElement | null)[] = new Array(TOTAL_FRAMES).fill(null);
       const BATCH_SIZE = 15;
+      let successCount = 0;
+      let failCount = 0;
       
       for (let batch = 0; batch < Math.ceil(TOTAL_FRAMES / BATCH_SIZE); batch++) {
         const batchPromises: Promise<void>[] = [];
@@ -50,11 +76,15 @@ const ExperienceContainer = ({
             
             img.onload = () => {
               imageArray[i] = img;
+              successCount++;
+              console.log(`✓ Loaded frame${frameNum}.jpg`);
               setLoadedCount((prev) => prev + 1);
               resolve();
             };
             
             img.onerror = () => {
+              failCount++;
+              console.warn(`✗ Failed to load frame${frameNum}.jpg`);
               setLoadedCount((prev) => prev + 1);
               resolve();
             };
@@ -66,6 +96,13 @@ const ExperienceContainer = ({
         
         await Promise.all(batchPromises);
       }
+      
+      console.log("========== FRAME LOADING COMPLETE ==========");
+      console.log(`✓ Successfully loaded: ${successCount}/${TOTAL_FRAMES} frames`);
+      if (failCount > 0) {
+        console.log(`✗ Failed to load: ${failCount} frames`);
+      }
+      console.log("=============================================");
       
       const validImages = imageArray.filter((img): img is HTMLImageElement => img !== null);
       setImages(validImages);
@@ -317,16 +354,37 @@ const ExperienceContainer = ({
       </div>
 
       {isLoading ? (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
-          <div className="relative h-px w-40 overflow-hidden bg-[hsl(30_8%_80%)]">
-            <div
-              className="absolute inset-y-0 left-0 bg-[hsl(30_8%_40%)] transition-all duration-150 ease-out"
-              style={{ width: `${loadingProgress}%` }}
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-6">
+          {/* Elegant spinning loader */}
+          <div className="relative w-12 h-12">
+            <div className="absolute inset-0 rounded-full border border-[hsl(30_8%_80%)]" />
+            <div 
+              className="absolute inset-0 rounded-full border-t border-[hsl(30_8%_35%)] animate-spin"
+              style={{ animationDuration: '1.5s', animationTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)' }}
+            />
+            <div 
+              className="absolute inset-2 rounded-full border-t border-[hsl(30_8%_50%)] animate-spin"
+              style={{ animationDuration: '2s', animationDirection: 'reverse', animationTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)' }}
             />
           </div>
-          <p className="font-sans text-[10px] tracking-[0.3em] text-[hsl(30_8%_50%)] uppercase">
-            Loading Experience · {loadingProgress}%
+          
+          {/* Premium message */}
+          <p className="font-serif text-sm md:text-base italic text-[hsl(30_8%_40%)] text-center px-8 transition-opacity duration-500">
+            {currentMessage}
           </p>
+          
+          {/* Progress indicator */}
+          <div className="flex flex-col items-center gap-2">
+            <div className="relative h-px w-32 overflow-hidden bg-[hsl(30_8%_85%)]">
+              <div
+                className="absolute inset-y-0 left-0 bg-[hsl(30_8%_45%)] transition-all duration-300 ease-out"
+                style={{ width: `${loadingProgress}%` }}
+              />
+            </div>
+            <p className="font-sans text-[9px] tracking-[0.3em] text-[hsl(30_8%_55%)] uppercase">
+              {loadingProgress}%
+            </p>
+          </div>
         </div>
       ) : images.length === 0 ? (
         <div className="absolute inset-0 flex items-center justify-center">
