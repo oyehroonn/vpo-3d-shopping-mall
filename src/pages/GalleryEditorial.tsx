@@ -107,8 +107,9 @@ const GalleryEditorial = () => {
       {/* Section 3: Experience Left, Text Right */}
       <section className="min-h-screen">
         <div className="grid grid-cols-1 lg:grid-cols-2 min-h-screen">
-          <ExperienceContainer 
-            className="h-[55vh] lg:h-auto"
+          <GLBViewer 
+            modelUrl="/models/anna_chasovsky.glb"
+            className="h-[400px] md:h-[500px] lg:h-full lg:min-h-[600px]"
             labelText="Private Showroom"
           />
           <div 
