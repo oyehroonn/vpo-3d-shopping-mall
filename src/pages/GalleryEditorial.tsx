@@ -44,10 +44,9 @@ const GalleryEditorial = () => {
       {/* Section 1: Experience Left, Text Right */}
       <section className="min-h-screen pt-24">
         <div className="grid grid-cols-1 lg:grid-cols-2 min-h-[calc(100vh-6rem)]">
-          <ExperienceContainer 
+          <SketchfabEmbed 
             className="h-[55vh] lg:h-auto"
             labelText="Store Interior"
-            isPrimary={true}
           />
           <div 
             style={{
