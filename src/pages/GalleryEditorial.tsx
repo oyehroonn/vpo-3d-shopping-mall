@@ -108,7 +108,7 @@ const GalleryEditorial = () => {
       <section className="min-h-screen">
         <div className="grid grid-cols-1 lg:grid-cols-2 min-h-screen">
           <GLBViewer 
-            modelUrl="/models/anna_chasovsky.glb"
+            modelUrl="/models/anna_chasovsky/scene.gltf"
             className="h-[280px] md:h-[420px] lg:h-auto"
             labelText="Private Showroom"
           />
