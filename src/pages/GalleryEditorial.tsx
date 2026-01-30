@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import ExperienceContainer from "@/components/gallery/ExperienceContainer";
 import EditorialSection from "@/components/gallery/EditorialSection";
+import GLBViewer from "@/components/gallery/GLBViewer";
 
 const GalleryEditorial = () => {
   return (
@@ -92,9 +93,11 @@ const GalleryEditorial = () => {
               ]}
             />
           </div>
-          <ExperienceContainer 
-            className="h-[55vh] lg:h-auto order-1 lg:order-2"
+          <GLBViewer 
+            modelUrl="/models/j._darnel_miu_miu.glb"
+            className="h-[280px] md:h-[420px] lg:h-auto order-1 lg:order-2"
             labelText="Atelier View"
+            autoRotate={true}
           />
         </div>
       </section>
