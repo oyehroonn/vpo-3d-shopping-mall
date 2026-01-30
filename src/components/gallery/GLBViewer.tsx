@@ -66,9 +66,12 @@ const GLBViewer = ({
           alt={labelText}
           camera-controls
           touch-action="pan-y"
-          shadow-intensity="1"
-          exposure="1"
-          shadow-softness="0.5"
+          environment-image="neutral"
+          tone-mapping="neutral"
+          exposure="1.2"
+          shadow-intensity="0.8"
+          shadow-softness="1"
+          interpolation-decay="75"
           style={{
             width: '100%',
             height: '100%',
