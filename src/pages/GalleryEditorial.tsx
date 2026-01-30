@@ -97,7 +97,6 @@ const GalleryEditorial = () => {
             modelUrl="/models/j._darnel_miu_miu.glb"
             className="h-[280px] md:h-[420px] lg:h-auto order-1 lg:order-2"
             labelText="Atelier View"
-            autoRotate={true}
           />
         </div>
       </section>

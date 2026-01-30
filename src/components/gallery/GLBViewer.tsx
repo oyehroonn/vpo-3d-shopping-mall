@@ -1,103 +1,27 @@
-import { Suspense, useRef } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, useGLTF, Center, ContactShadows } from '@react-three/drei';
-import * as THREE from 'three';
-
-interface ModelProps {
-  url: string;
-  autoRotate?: boolean;
-}
-
-function Model({ url }: ModelProps) {
-  const { scene } = useGLTF(url);
-  const modelRef = useRef<THREE.Group>(null);
-  
-  scene.traverse((child) => {
-    if (child instanceof THREE.Mesh) {
-      child.castShadow = true;
-      child.receiveShadow = true;
-      if (child.material) {
-        child.material.needsUpdate = true;
-      }
-    }
-  });
-
-  return (
-    <Center>
-      <group ref={modelRef}>
-        <primitive 
-          object={scene} 
-          scale={2}
-          position={[0, 0, 0]}
-        />
-      </group>
-    </Center>
-  );
-}
-
-function LoadingPlaceholder() {
-  const meshRef = useRef<THREE.Mesh>(null);
-  
-  useFrame((state) => {
-    if (meshRef.current) {
-      meshRef.current.rotation.y = state.clock.elapsedTime * 0.5;
-    }
-  });
-
-  return (
-    <mesh ref={meshRef}>
-      <boxGeometry args={[0.5, 0.8, 0.3]} />
-      <meshStandardMaterial color="#c4b5a0" transparent opacity={0.3} wireframe />
-    </mesh>
-  );
-}
-
-function StudioLighting() {
-  return (
-    <>
-      <ambientLight intensity={0.6} color="#fff8f0" />
-      <spotLight
-        position={[3, 5, 5]}
-        angle={0.5}
-        penumbra={0.8}
-        intensity={1.5}
-        color="#ffffff"
-        castShadow
-        shadow-mapSize={[1024, 1024]}
-      />
-      <spotLight
-        position={[-4, 3, 3]}
-        angle={0.6}
-        penumbra={1}
-        intensity={0.8}
-        color="#ffeedd"
-      />
-      <spotLight
-        position={[0, 6, -4]}
-        angle={0.4}
-        penumbra={0.5}
-        intensity={1}
-        color="#ffffff"
-      />
-      <pointLight position={[0, 8, 2]} intensity={0.8} color="#fff8f5" />
-      <directionalLight position={[0, 2, 6]} intensity={0.5} color="#ffffff" />
-    </>
-  );
-}
+import { useEffect } from 'react';
 
 interface GLBViewerProps {
   modelUrl: string;
   className?: string;
   labelText?: string;
-  autoRotate?: boolean;
 }
 
 const GLBViewer = ({ 
   modelUrl, 
   className = "", 
-  labelText = "3D View",
-  autoRotate = true
+  labelText = "3D View"
 }: GLBViewerProps) => {
+  
+  useEffect(() => {
+    // Load model-viewer script if not already loaded
+    if (!document.querySelector('script[src*="model-viewer"]')) {
+      const script = document.createElement('script');
+      script.type = 'module';
+      script.src = 'https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js';
+      document.head.appendChild(script);
+    }
+  }, []);
+
   return (
     <div 
       className={`relative overflow-hidden ${className}`}
@@ -134,50 +58,24 @@ const GLBViewer = ({
         </span>
       </div>
 
-      {/* 3D Canvas */}
+      {/* Model Viewer */}
       <div className="absolute inset-0 w-full h-full">
-        <Canvas
-          camera={{ position: [0, 0.5, 4], fov: 45 }}
-          style={{ background: 'transparent' }}
-          gl={{ 
-            antialias: true, 
-            alpha: true,
-            toneMapping: THREE.ACESFilmicToneMapping,
-            toneMappingExposure: 1.1
+        {/* @ts-ignore - model-viewer is a web component */}
+        <model-viewer
+          src={modelUrl}
+          alt={labelText}
+          camera-controls
+          touch-action="pan-y"
+          shadow-intensity="1"
+          exposure="1"
+          shadow-softness="0.5"
+          style={{
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'transparent',
+            '--poster-color': 'transparent'
           }}
-          shadows
-        >
-          <StudioLighting />
-          
-          <Suspense fallback={<LoadingPlaceholder />}>
-            <Model url={modelUrl} autoRotate={autoRotate} />
-          </Suspense>
-          
-          <ContactShadows
-            position={[0, -1.2, 0]}
-            opacity={0.4}
-            scale={8}
-            blur={2}
-            far={4}
-            color="#8a7a6a"
-          />
-          
-          <OrbitControls
-            enableZoom={true}
-            enablePan={false}
-            autoRotate={autoRotate}
-            autoRotateSpeed={1.5}
-            minDistance={2}
-            maxDistance={8}
-            minPolarAngle={Math.PI / 6}
-            maxPolarAngle={Math.PI / 2 + 0.2}
-            zoomSpeed={0.6}
-            rotateSpeed={0.5}
-            dampingFactor={0.1}
-            enableDamping={true}
-            target={[0, 0.3, 0]}
-          />
-        </Canvas>
+        />
       </div>
     </div>
   );
