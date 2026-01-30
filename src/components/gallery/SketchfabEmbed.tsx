@@ -1,12 +1,17 @@
 interface SketchfabEmbedProps {
   className?: string;
   labelText?: string;
+  modelId?: string;
 }
 
 const SketchfabEmbed = ({ 
   className = "", 
-  labelText = "Atelier View"
+  labelText = "Atelier View",
+  modelId = "d047ee946d8048039582e83f412f1e13"
 }: SketchfabEmbedProps) => {
+  // Append parameters to hide UI elements and watermarks
+  const embedUrl = `https://sketchfab.com/models/${modelId}/embed?ui_infos=0&ui_controls=0&ui_watermark=0&ui_watermark_link=0&ui_stop=0&preload=1`;
+
   return (
     <div 
       className={`relative overflow-hidden ${className}`}
@@ -36,15 +41,15 @@ const SketchfabEmbed = ({
         </span>
       </div>
 
-      {/* Sketchfab iframe container */}
-      <div className="absolute inset-3 md:inset-5 flex items-center justify-center pt-12 pb-4">
+      {/* Sketchfab iframe - full coverage with clipping to hide any overflow */}
+      <div className="absolute inset-0 overflow-hidden">
         <iframe 
-          title="Final Project: B. Crenek - Coze"
-          className="w-full h-[280px] md:h-[420px]"
-          frameBorder="0"
+          title={labelText}
+          className="w-full h-[280px] md:h-[420px] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 min-w-full min-h-full"
+          style={{ border: 'none' }}
           allowFullScreen
           allow="autoplay; fullscreen; xr-spatial-tracking"
-          src="https://sketchfab.com/models/d047ee946d8048039582e83f412f1e13/embed"
+          src={embedUrl}
         />
       </div>
     </div>
