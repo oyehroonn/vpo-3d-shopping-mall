@@ -66,10 +66,9 @@ const GLBViewer = ({
           alt={labelText}
           camera-controls
           touch-action="pan-y"
-          environment-image="neutral"
-          tone-mapping="neutral"
-          exposure="1.2"
-          shadow-intensity="0.8"
+          environment-image="https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/studio_small_03_1k.hdr"
+          exposure="0.8"
+          shadow-intensity="0.5"
           shadow-softness="1"
           interpolation-decay="75"
           style={{
