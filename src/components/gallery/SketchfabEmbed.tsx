@@ -39,12 +39,12 @@ const SketchfabEmbed = ({
       {/* Sketchfab iframe container */}
       <div className="absolute inset-3 md:inset-5 flex items-center justify-center pt-12 pb-4">
         <iframe 
-          title="3D Model View"
+          title="Final Project: B. Crenek - Coze"
           className="w-full h-[280px] md:h-[420px]"
           frameBorder="0"
           allowFullScreen
           allow="autoplay; fullscreen; xr-spatial-tracking"
-          src="https://sketchfab.com/models/d047ee946d8048039582e83f412f1e13/embed?ui_infos=0&ui_controls=0&ui_watermark=0&ui_watermark_link=0&ui_hint=0&ui_stop=0&preload=1&ui_theme=dark"
+          src="https://sketchfab.com/models/d047ee946d8048039582e83f412f1e13/embed"
         />
       </div>
     </div>
