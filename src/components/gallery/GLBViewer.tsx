@@ -1,4 +1,85 @@
-import { useEffect } from 'react';
+import { Suspense, useRef } from 'react';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { OrbitControls, useGLTF, Center, ContactShadows } from '@react-three/drei';
+import * as THREE from 'three';
+
+interface ModelProps {
+  url: string;
+}
+
+function Model({ url }: ModelProps) {
+  const { scene } = useGLTF(url);
+  
+  scene.traverse((child) => {
+    if (child instanceof THREE.Mesh) {
+      child.castShadow = true;
+      child.receiveShadow = true;
+      if (child.material) {
+        child.material.needsUpdate = true;
+      }
+    }
+  });
+
+  return (
+    <Center>
+      <primitive 
+        object={scene} 
+        scale={2}
+        position={[0, 0, 0]}
+      />
+    </Center>
+  );
+}
+
+function LoadingPlaceholder() {
+  const meshRef = useRef<THREE.Mesh>(null);
+  
+  useFrame((state) => {
+    if (meshRef.current) {
+      meshRef.current.rotation.y = state.clock.elapsedTime * 0.5;
+    }
+  });
+
+  return (
+    <mesh ref={meshRef}>
+      <boxGeometry args={[0.5, 0.8, 0.3]} />
+      <meshStandardMaterial color="#c4b5a0" transparent opacity={0.3} wireframe />
+    </mesh>
+  );
+}
+
+function StudioLighting() {
+  return (
+    <>
+      <ambientLight intensity={0.6} color="#fff8f0" />
+      <spotLight
+        position={[3, 5, 5]}
+        angle={0.5}
+        penumbra={0.8}
+        intensity={1.5}
+        color="#ffffff"
+        castShadow
+        shadow-mapSize={[1024, 1024]}
+      />
+      <spotLight
+        position={[-4, 3, 3]}
+        angle={0.6}
+        penumbra={1}
+        intensity={0.8}
+        color="#ffeedd"
+      />
+      <spotLight
+        position={[0, 6, -4]}
+        angle={0.4}
+        penumbra={0.5}
+        intensity={1}
+        color="#ffffff"
+      />
+      <pointLight position={[0, 8, 2]} intensity={0.8} color="#fff8f5" />
+      <directionalLight position={[0, 2, 6]} intensity={0.5} color="#ffffff" />
+    </>
+  );
+}
 
 interface GLBViewerProps {
   modelUrl: string;
@@ -11,17 +92,6 @@ const GLBViewer = ({
   className = "", 
   labelText = "3D View"
 }: GLBViewerProps) => {
-  
-  useEffect(() => {
-    // Load model-viewer script if not already loaded
-    if (!document.querySelector('script[src*="model-viewer"]')) {
-      const script = document.createElement('script');
-      script.type = 'module';
-      script.src = 'https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js';
-      document.head.appendChild(script);
-    }
-  }, []);
-
   return (
     <div 
       className={`relative overflow-hidden ${className}`}
@@ -54,28 +124,71 @@ const GLBViewer = ({
       {/* Interaction hint */}
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20">
         <span className="font-sans text-[9px] tracking-[0.25em] text-[hsl(30_8%_45%)] uppercase">
-          Drag to rotate · Scroll to zoom
+          Scroll to zoom in · Drag to pan · Right-click to rotate
         </span>
       </div>
 
-      {/* Model Viewer */}
+      {/* 3D Canvas */}
       <div className="absolute inset-0 w-full h-full">
-        {/* @ts-ignore - model-viewer is a web component */}
-        <model-viewer
-          src={modelUrl}
-          alt={labelText}
-          camera-controls
-          touch-action="pan-y"
-          shadow-intensity="1"
-          exposure="1"
-          shadow-softness="0.5"
-          style={{
-            width: '100%',
-            height: '100%',
-            backgroundColor: 'transparent',
-            '--poster-color': 'transparent'
+        <Canvas
+          camera={{ position: [0, 0.5, 4], fov: 45 }}
+          style={{ background: 'transparent' }}
+          gl={{ 
+            antialias: true, 
+            alpha: true,
+            toneMapping: THREE.ACESFilmicToneMapping,
+            toneMappingExposure: 1.1
           }}
-        />
+          shadows
+        >
+          <StudioLighting />
+          
+          <Suspense fallback={<LoadingPlaceholder />}>
+            <Model url={modelUrl} />
+          </Suspense>
+          
+          <ContactShadows
+            position={[0, -1.2, 0]}
+            opacity={0.4}
+            scale={8}
+            blur={2}
+            far={4}
+            color="#8a7a6a"
+          />
+          
+          {/* OrbitControls configured for free exploration */}
+          <OrbitControls
+            enableZoom={true}
+            enablePan={true}
+            enableRotate={true}
+            // No auto-rotate
+            autoRotate={false}
+            // Left mouse = pan, right mouse = rotate
+            mouseButtons={{
+              LEFT: THREE.MOUSE.PAN,
+              MIDDLE: THREE.MOUSE.DOLLY,
+              RIGHT: THREE.MOUSE.ROTATE
+            }}
+            // Touch: one finger = pan, two fingers = dolly/rotate
+            touches={{
+              ONE: THREE.TOUCH.PAN,
+              TWO: THREE.TOUCH.DOLLY_ROTATE
+            }}
+            // No distance limits - can go inside the model
+            minDistance={0.1}
+            maxDistance={50}
+            // Polar angle limits (vertical rotation)
+            minPolarAngle={0}
+            maxPolarAngle={Math.PI}
+            // Smooth controls
+            zoomSpeed={1.2}
+            panSpeed={0.8}
+            rotateSpeed={0.5}
+            dampingFactor={0.1}
+            enableDamping={true}
+            target={[0, 0.3, 0]}
+          />
+        </Canvas>
       </div>
     </div>
   );
