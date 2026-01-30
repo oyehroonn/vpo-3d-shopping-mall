@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import ExperienceContainer from "@/components/gallery/ExperienceContainer";
 import EditorialSection from "@/components/gallery/EditorialSection";
-import GLBModelViewer from "@/components/gallery/GLBModelViewer";
+import SketchfabEmbed from "@/components/gallery/SketchfabEmbed";
 
 const GalleryEditorial = () => {
   return (
@@ -93,7 +93,7 @@ const GalleryEditorial = () => {
               ]}
             />
           </div>
-          <GLBModelViewer 
+          <SketchfabEmbed 
             className="h-[55vh] lg:h-auto order-1 lg:order-2"
             labelText="Atelier View"
           />
