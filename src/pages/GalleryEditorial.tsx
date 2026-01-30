@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import ExperienceContainer from "@/components/gallery/ExperienceContainer";
 import EditorialSection from "@/components/gallery/EditorialSection";
 import GLBViewer from "@/components/gallery/GLBViewer";
+import GLTFViewerR3F from "@/components/gallery/GLTFViewerR3F";
 
 const GalleryEditorial = () => {
   return (
@@ -107,7 +108,7 @@ const GalleryEditorial = () => {
       {/* Section 3: Experience Left, Text Right */}
       <section className="min-h-screen">
         <div className="grid grid-cols-1 lg:grid-cols-2 min-h-screen">
-          <GLBViewer 
+          <GLTFViewerR3F 
             modelUrl="/models/anna_chasovsky/scene.gltf"
             className="h-[280px] md:h-[420px] lg:h-auto"
             labelText="Private Showroom"
