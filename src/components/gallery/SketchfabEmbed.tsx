@@ -44,7 +44,7 @@ const SketchfabEmbed = ({
           frameBorder="0"
           allowFullScreen
           allow="autoplay; fullscreen; xr-spatial-tracking"
-          src="https://sketchfab.com/models/d047ee946d8048039582e83f412f1e13/embed"
+          src="https://sketchfab.com/models/d047ee946d8048039582e83f412f1e13/embed?ui_infos=0&ui_controls=0&ui_watermark=0&ui_watermark_link=0"
         />
       </div>
     </div>
