@@ -1,6 +1,5 @@
 import { ArrowRight } from "lucide-react";
 import ScrollReveal from "@/components/ScrollReveal";
-import ParallaxWrapper from "@/components/ParallaxWrapper";
 
 const ManifestoSection = () => {
   return (
@@ -15,34 +14,28 @@ const ManifestoSection = () => {
               (01) — MANIFESTO
             </span>
           </ScrollReveal>
-          <ParallaxWrapper speed={0.08} direction="up">
-            <ScrollReveal delay={0.1}>
-              <h2 className="text-5xl md:text-6xl lg:text-7xl font-serif font-light leading-[1.1] text-foreground">
-                Fashion is<br />
-                not just<br />
-                seen.
-              </h2>
-            </ScrollReveal>
-          </ParallaxWrapper>
-          <ParallaxWrapper speed={0.12} direction="up">
-            <ScrollReveal delay={0.2}>
-              <h2 className="text-5xl md:text-6xl lg:text-7xl font-serif font-light italic text-foreground mt-4">
-                It is<br />
-                experienced.
-              </h2>
-            </ScrollReveal>
-          </ParallaxWrapper>
+          <ScrollReveal delay={0.1}>
+            <h2 className="text-5xl md:text-6xl lg:text-7xl font-serif font-light leading-[1.1] text-foreground">
+              Fashion is<br />
+              not just<br />
+              seen.
+            </h2>
+          </ScrollReveal>
+          <ScrollReveal delay={0.2}>
+            <h2 className="text-5xl md:text-6xl lg:text-7xl font-serif font-light italic text-foreground mt-4">
+              It is<br />
+              experienced.
+            </h2>
+          </ScrollReveal>
         </div>
 
         {/* Right - Body text */}
         <div className="flex flex-col justify-center lg:pt-24">
-          <ParallaxWrapper speed={0.1} direction="down">
-            <ScrollReveal delay={0.3} direction="right">
-              <p className="text-xl md:text-2xl font-serif font-light leading-relaxed text-foreground/80">
-                We are stripping away the barriers of traditional e-commerce. No more static grids. No more flat images. We bring the texture of the sidewalk, the noise of the city, and the intimacy of the boutique directly to your screen.
-              </p>
-            </ScrollReveal>
-          </ParallaxWrapper>
+          <ScrollReveal delay={0.3} direction="right">
+            <p className="text-xl md:text-2xl font-serif font-light leading-relaxed text-foreground/80">
+              We are stripping away the barriers of traditional e-commerce. No more static grids. No more flat images. We bring the texture of the sidewalk, the noise of the city, and the intimacy of the boutique directly to your screen.
+            </p>
+          </ScrollReveal>
           <ScrollReveal delay={0.4} direction="right">
             <a
               href="#"

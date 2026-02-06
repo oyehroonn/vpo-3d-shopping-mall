@@ -1,6 +1,5 @@
 import { ShoppingBag } from "lucide-react";
 import ScrollReveal from "@/components/ScrollReveal";
-import ParallaxWrapper from "@/components/ParallaxWrapper";
 
 const RunwaySection = () => {
   const scheduleItems = [
@@ -15,16 +14,14 @@ const RunwaySection = () => {
         {/* Header */}
         <ScrollReveal>
           <div className="flex flex-col md:flex-row justify-between items-end mb-20 border-b border-white/10 pb-6">
-            <ParallaxWrapper speed={0.06} direction="up">
-              <div>
-                <span className="text-[10px] font-semibold text-red-700 uppercase tracking-[0.3em] mb-4 block">
-                  Live Broadcast
-                </span>
-                <h2 className="text-5xl md:text-7xl font-serif tracking-tight leading-none">
-                  The Runway
-                </h2>
-              </div>
-            </ParallaxWrapper>
+            <div>
+              <span className="text-[10px] font-semibold text-red-700 uppercase tracking-[0.3em] mb-4 block">
+                Live Broadcast
+              </span>
+              <h2 className="text-5xl md:text-7xl font-serif tracking-tight leading-none">
+                The Runway
+              </h2>
+            </div>
 
             {/* Act Tabs */}
             <div className="flex gap-8 mt-8 md:mt-0">
@@ -84,29 +81,28 @@ const RunwaySection = () => {
 
           {/* Side Panel */}
           <ScrollReveal direction="right" delay={0.2} className="lg:col-span-3 flex flex-col justify-between h-full border-l border-white/5 pl-0 lg:pl-12">
-            <ParallaxWrapper speed={0.08} direction="down">
-              <div>
-                <h4 className="text-lg font-serif italic mb-8 text-stone-400">
-                  Drop Schedule
-                </h4>
-                <ul className="space-y-6">
-                  {scheduleItems.map((item, index) => (
-                    <li
-                      key={index}
-                      className={`group cursor-pointer ${index > 0 ? 'opacity-50 hover:opacity-100' : ''} transition-opacity`}
-                    >
-                      <div className="flex justify-between text-xs font-mono text-stone-500 mb-1 group-hover:text-white transition-colors">
-                        <span>{item.time}</span>
-                        <span>{item.status}</span>
-                      </div>
-                      <p className="text-sm font-light text-stone-300">
-                        {item.label}
-                      </p>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </ParallaxWrapper>
+            {/* Drop Schedule */}
+            <div>
+              <h4 className="text-lg font-serif italic mb-8 text-stone-400">
+                Drop Schedule
+              </h4>
+              <ul className="space-y-6">
+                {scheduleItems.map((item, index) => (
+                  <li
+                    key={index}
+                    className={`group cursor-pointer ${index > 0 ? 'opacity-50 hover:opacity-100' : ''} transition-opacity`}
+                  >
+                    <div className="flex justify-between text-xs font-mono text-stone-500 mb-1 group-hover:text-white transition-colors">
+                      <span>{item.time}</span>
+                      <span>{item.status}</span>
+                    </div>
+                    <p className="text-sm font-light text-stone-300">
+                      {item.label}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            </div>
 
             {/* Lobby/Social Feature Teaser */}
             <div className="mt-12 lg:mt-0 p-6 bg-white/5 border border-white/5 backdrop-blur-sm">
