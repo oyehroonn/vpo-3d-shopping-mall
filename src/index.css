@@ -4,11 +4,21 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Smooth scrolling */
+/* Smooth scrolling with premium feel */
 html {
   scroll-behavior: smooth;
 }
 
+/* Premium scroll snap for sections */
+@media (min-width: 768px) {
+  .snap-container {
+    scroll-snap-type: y proximity;
+  }
+  
+  .snap-section {
+    scroll-snap-align: start;
+  }
+}
 
 @layer base {
   :root {

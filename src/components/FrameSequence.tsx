@@ -224,7 +224,7 @@ const FrameSequence = () => {
   if (viewMode === 'lite') {
     return (
       <section 
-        className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[#050505]"
+        className="relative min-h-screen flex items-center justify-center overflow-hidden bg-background"
       >
         <img 
           src={vpoHeroBg} 
