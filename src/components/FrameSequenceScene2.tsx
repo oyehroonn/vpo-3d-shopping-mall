@@ -167,35 +167,37 @@ const FrameSequenceScene2 = () => {
   const loadingProgress = Math.round((loadedCount / TOTAL_FRAMES) * 100);
 
   return (
-    <div
-      ref={containerRef}
-      className="relative h-screen w-full overflow-hidden bg-background z-0"
-    >
-      {isLoading ? (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-background">
-          <h2 className="font-display text-lg tracking-[0.3em] text-foreground/60">
-            LOADING SCENE
-          </h2>
-          <div className="relative h-1 w-48 overflow-hidden rounded-full bg-muted">
-            <div
-              className="absolute inset-y-0 left-0 bg-foreground/60 transition-all duration-150 ease-out"
-              style={{ width: `${loadingProgress}%` }}
-            />
+    <div className="relative z-0 overflow-hidden">
+      <div
+        ref={containerRef}
+        className="relative h-screen w-full overflow-hidden bg-background"
+      >
+        {isLoading ? (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-background">
+            <h2 className="font-display text-lg tracking-[0.3em] text-foreground/60">
+              LOADING SCENE
+            </h2>
+            <div className="relative h-1 w-48 overflow-hidden rounded-full bg-muted">
+              <div
+                className="absolute inset-y-0 left-0 bg-foreground/60 transition-all duration-150 ease-out"
+                style={{ width: `${loadingProgress}%` }}
+              />
+            </div>
+            <p className="font-mono text-xs text-muted-foreground">
+              {loadedCount}/{TOTAL_FRAMES} ({loadingProgress}%)
+            </p>
           </div>
-          <p className="font-mono text-xs text-muted-foreground">
-            {loadedCount}/{TOTAL_FRAMES} ({loadingProgress}%)
-          </p>
-        </div>
-      ) : images.length === 0 ? (
-        <div className="absolute inset-0 flex items-center justify-center bg-background">
-          <p className="font-mono text-sm text-muted-foreground">Scene unavailable</p>
-        </div>
-      ) : (
-        <canvas
-          ref={canvasRef}
-          className="absolute inset-0 h-full w-full"
-        />
-      )}
+        ) : images.length === 0 ? (
+          <div className="absolute inset-0 flex items-center justify-center bg-background">
+            <p className="font-mono text-sm text-muted-foreground">Scene unavailable</p>
+          </div>
+        ) : (
+          <canvas
+            ref={canvasRef}
+            className="absolute inset-0 h-full w-full"
+          />
+        )}
+      </div>
     </div>
   );
 };
