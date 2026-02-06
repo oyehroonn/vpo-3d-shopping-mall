@@ -147,9 +147,9 @@ const GLTFViewerR3F = ({
       <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/20 to-black/30" />
 
       {/* SEE IN 360° header */}
-      <div className="absolute top-8 left-1/2 -translate-x-1/2 text-center z-20">
+      <div className="absolute top-6 left-1/2 -translate-x-1/2 text-center z-20">
         <h2 
-          className="text-white text-xl md:text-2xl lg:text-3xl tracking-[0.5em] font-light"
+          className="text-white text-lg md:text-xl lg:text-2xl tracking-[0.5em] font-light"
           style={{ 
             fontFamily: '"Cormorant Garamond", Georgia, serif',
             textShadow: '0 0 60px rgba(0,0,0,0.9), 0 4px 20px rgba(0,0,0,0.5)'
@@ -157,17 +157,17 @@ const GLTFViewerR3F = ({
         >
           SEE IN 360°
         </h2>
-        <div className="mt-2 w-16 h-[1px] bg-gradient-to-r from-transparent via-white/30 to-transparent mx-auto" />
+        <div className="mt-1.5 w-12 h-[1px] bg-gradient-to-r from-transparent via-white/30 to-transparent mx-auto" />
       </div>
 
       {/* Corner accents - white for dark background */}
-      <div className="absolute top-4 left-4 w-8 h-8 border-l border-t border-white/10 pointer-events-none z-10" />
-      <div className="absolute top-4 right-4 w-8 h-8 border-r border-t border-white/10 pointer-events-none z-10" />
-      <div className="absolute bottom-4 left-4 w-8 h-8 border-l border-b border-white/10 pointer-events-none z-10" />
-      <div className="absolute bottom-4 right-4 w-8 h-8 border-r border-b border-white/10 pointer-events-none z-10" />
+      <div className="absolute top-3 left-3 w-6 h-6 border-l border-t border-white/10 pointer-events-none z-10" />
+      <div className="absolute top-3 right-3 w-6 h-6 border-r border-t border-white/10 pointer-events-none z-10" />
+      <div className="absolute bottom-3 left-3 w-6 h-6 border-l border-b border-white/10 pointer-events-none z-10" />
+      <div className="absolute bottom-3 right-3 w-6 h-6 border-r border-b border-white/10 pointer-events-none z-10" />
 
-      {/* Label */}
-      <div className="absolute top-16 left-6 md:top-20 md:left-8 z-20 flex items-center gap-3">
+      {/* Label - positioned bottom left to avoid overlap */}
+      <div className="absolute bottom-14 left-5 md:bottom-16 md:left-7 z-20 flex items-center gap-2">
         <span className="font-sans text-[11px] tracking-[0.15em] text-white/70 uppercase font-medium">
           {labelText}
         </span>
