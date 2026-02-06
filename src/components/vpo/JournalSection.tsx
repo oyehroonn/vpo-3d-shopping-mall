@@ -24,7 +24,7 @@ const JournalSection = () => {
   ];
 
   return (
-    <section id="journal" className="bg-[#FDFBF7] border-t border-stone-200">
+    <section id="journal" className="relative z-10 bg-[#FDFBF7] border-t border-stone-200">
       <div className="max-w-[1600px] mx-auto px-6 md:px-10 py-16 md:py-24">
         {/* Header */}
         <div className="flex items-end justify-between mb-12 md:mb-16">

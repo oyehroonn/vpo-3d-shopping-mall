@@ -90,7 +90,7 @@ const QuoteSection = () => {
   return (
     <section 
       ref={sectionRef}
-      className="min-h-screen bg-light flex flex-col items-center justify-center px-8 py-32 relative overflow-hidden"
+      className="relative z-10 min-h-screen bg-light flex flex-col items-center justify-center px-8 py-32 overflow-hidden"
     >
       {/* Grid pattern background */}
       <div 
