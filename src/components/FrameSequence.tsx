@@ -274,7 +274,7 @@ const FrameSequence = () => {
           </div>
         ) : images.length === 0 ? (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-background">
-            <p className="font-mono text-lg text-red-500">No frames loaded</p>
+            <p className="font-mono text-lg text-destructive">No frames loaded</p>
             <p className="font-mono text-sm text-muted-foreground max-w-md text-center">
               Unable to load frames. Check console for details.
             </p>
