@@ -1,150 +1,89 @@
-import { useEffect, useRef } from "react";
 import { ShoppingBag } from "lucide-react";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-
-gsap.registerPlugin(ScrollTrigger);
+import ScrollReveal from "@/components/ScrollReveal";
 
 const RunwaySection = () => {
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const headerRef = useRef<HTMLDivElement>(null);
-  const mainImageRef = useRef<HTMLDivElement>(null);
-  const sidePanelRef = useRef<HTMLDivElement>(null);
-
   const scheduleItems = [
     { time: "09:00 EST", status: "Live", label: "The Black Coat Collection" },
     { time: "12:00 EST", status: "Upcoming", label: "Accessories Vault" },
     { time: "16:00 EST", status: "Upcoming", label: "Footwear Archive" },
   ];
 
-  useEffect(() => {
-    const section = sectionRef.current;
-    const header = headerRef.current;
-    const mainImage = mainImageRef.current;
-    const sidePanel = sidePanelRef.current;
-
-    if (!section || !header || !mainImage || !sidePanel) return;
-
-    const ctx = gsap.context(() => {
-      // Header fade in from top
-      gsap.set(header, { opacity: 0, y: -30 });
-      gsap.to(header, {
-        opacity: 1,
-        y: 0,
-        duration: 0.8,
-        ease: "power2.out",
-        scrollTrigger: {
-          trigger: section,
-          start: "top 75%",
-          toggleActions: "play none none reverse",
-        },
-      });
-
-      // Main image scale and fade
-      gsap.set(mainImage, { opacity: 0, scale: 0.95 });
-      gsap.to(mainImage, {
-        opacity: 1,
-        scale: 1,
-        duration: 1,
-        ease: "power2.out",
-        scrollTrigger: {
-          trigger: section,
-          start: "top 65%",
-          toggleActions: "play none none reverse",
-        },
-      });
-
-      // Side panel slide in from right
-      gsap.set(sidePanel, { opacity: 0, x: 60 });
-      gsap.to(sidePanel, {
-        opacity: 1,
-        x: 0,
-        duration: 0.8,
-        ease: "power2.out",
-        scrollTrigger: {
-          trigger: section,
-          start: "top 60%",
-          toggleActions: "play none none reverse",
-        },
-      });
-
-    }, section);
-
-    return () => ctx.revert();
-  }, []);
-
   return (
-    <section ref={sectionRef} id="runway" className="relative z-10 bg-background border-t border-border/10">
+    <section id="runway" className="relative z-10 bg-background border-t border-border/10">
       <div className="max-w-[1600px] mx-auto px-6 md:px-10 py-16 md:py-24">
         {/* Header */}
-        <div ref={headerRef} className="flex flex-col md:flex-row md:items-end md:justify-between mb-10 md:mb-16">
-          <div>
-            <div className="flex items-center gap-2 mb-4">
-              <span className="text-xs tracking-[0.2em] uppercase text-foreground/50 font-sans">
-                Live Broadcast
-              </span>
-              <span className="w-2 h-2 rounded-full bg-destructive animate-pulse" />
+        <ScrollReveal>
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between mb-10 md:mb-16">
+            <div>
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-xs tracking-[0.2em] uppercase text-foreground/50 font-sans">
+                  Live Broadcast
+                </span>
+                <span className="w-2 h-2 rounded-full bg-destructive animate-pulse" />
+              </div>
+              <h2 className="font-display text-4xl md:text-5xl lg:text-6xl text-foreground italic">
+                The Runway
+              </h2>
             </div>
-            <h2 className="font-display text-4xl md:text-5xl lg:text-6xl text-foreground italic">
-              The Runway
-            </h2>
-          </div>
 
-          {/* Act Tabs */}
-          <div className="flex gap-6 mt-6 md:mt-0">
-            <button className="text-sm tracking-[0.15em] uppercase text-foreground pb-2 border-b border-foreground">
-              Act I: Genesis
-            </button>
-            <button className="text-sm tracking-[0.15em] uppercase text-foreground/40 hover:text-foreground/70 transition-colors pb-2 border-b border-transparent">
-              Act II: Void
-            </button>
-            <button className="text-sm tracking-[0.15em] uppercase text-foreground/40 hover:text-foreground/70 transition-colors pb-2 border-b border-transparent">
-              Act III: Bloom
-            </button>
+            {/* Act Tabs */}
+            <div className="flex gap-6 mt-6 md:mt-0">
+              <button className="text-sm tracking-[0.15em] uppercase text-foreground pb-2 border-b border-foreground">
+                Act I: Genesis
+              </button>
+              <button className="text-sm tracking-[0.15em] uppercase text-foreground/40 hover:text-foreground/70 transition-colors pb-2 border-b border-transparent">
+                Act II: Void
+              </button>
+              <button className="text-sm tracking-[0.15em] uppercase text-foreground/40 hover:text-foreground/70 transition-colors pb-2 border-b border-transparent">
+                Act III: Bloom
+              </button>
+            </div>
           </div>
-        </div>
+        </ScrollReveal>
 
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:gap-8">
           {/* Main Stage Image */}
-          <div ref={mainImageRef} className="lg:col-span-3 relative group cursor-pointer overflow-hidden rounded-sm">
-            <div className="aspect-[16/10] lg:aspect-auto lg:h-[70vh] overflow-hidden">
-              <img
-                src="https://images.unsplash.com/photo-1537832816519-689ad163238b?w=1600&q=90"
-                alt="Runway show"
-                className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-[2s] ease-out"
-              />
-            </div>
-
-            {/* Live Feed Indicator */}
-            <div className="absolute top-6 left-6 flex items-center gap-2 bg-background/60 backdrop-blur-sm px-3 py-1.5 rounded-full">
-              <span className="w-2 h-2 rounded-full bg-destructive animate-pulse" />
-              <span className="text-[10px] tracking-[0.15em] uppercase text-foreground/80 font-sans">
-                Live Feed • Cam 04
-              </span>
-            </div>
-
-            {/* Bottom Gradient Overlay */}
-            <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-background/90 via-background/50 to-transparent" />
-
-            {/* Look Info */}
-            <div className="absolute bottom-6 left-6 right-6 flex items-end justify-between">
-              <div>
-                <p className="font-display text-xl md:text-2xl text-foreground italic mb-1">
-                  Look 04: Obsidian Veil
-                </p>
-                <p className="text-xs tracking-[0.15em] uppercase text-foreground/50 font-sans">
-                  Designed by Maison VPO
-                </p>
+          <ScrollReveal direction="scale" className="lg:col-span-3">
+            <div className="relative group cursor-pointer overflow-hidden rounded-sm">
+              <div className="aspect-[16/10] lg:aspect-auto lg:h-[70vh] overflow-hidden">
+                <img
+                  src="https://images.unsplash.com/photo-1537832816519-689ad163238b?w=1600&q=90"
+                  alt="Runway show"
+                  className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-[2s] ease-out"
+                />
               </div>
-              <button className="w-12 h-12 rounded-full border border-foreground/30 flex items-center justify-center hover:bg-foreground hover:text-background transition-colors duration-300 group/btn">
-                <ShoppingBag className="w-5 h-5 text-foreground group-hover/btn:text-background transition-colors" />
-              </button>
+
+              {/* Live Feed Indicator */}
+              <div className="absolute top-6 left-6 flex items-center gap-2 bg-background/60 backdrop-blur-sm px-3 py-1.5 rounded-full">
+                <span className="w-2 h-2 rounded-full bg-destructive animate-pulse" />
+                <span className="text-[10px] tracking-[0.15em] uppercase text-foreground/80 font-sans">
+                  Live Feed • Cam 04
+                </span>
+              </div>
+
+              {/* Bottom Gradient Overlay */}
+              <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-background/90 via-background/50 to-transparent" />
+
+              {/* Look Info */}
+              <div className="absolute bottom-6 left-6 right-6 flex items-end justify-between">
+                <div>
+                  <p className="font-display text-xl md:text-2xl text-foreground italic mb-1">
+                    Look 04: Obsidian Veil
+                  </p>
+                  <p className="text-xs tracking-[0.15em] uppercase text-foreground/50 font-sans">
+                    Designed by Maison VPO
+                  </p>
+                </div>
+                <button className="w-12 h-12 rounded-full border border-foreground/30 flex items-center justify-center hover:bg-foreground hover:text-background transition-colors duration-300 group/btn">
+                  <ShoppingBag className="w-5 h-5 text-foreground group-hover/btn:text-background transition-colors" />
+                </button>
+              </div>
             </div>
-          </div>
+          </ScrollReveal>
 
           {/* Side Panel */}
-          <div ref={sidePanelRef} className="lg:col-span-1 flex flex-col gap-6">
+          <ScrollReveal direction="right" delay={0.2} className="lg:col-span-1 flex flex-col gap-6">
             {/* Drop Schedule */}
             <div className="bg-secondary/50 border border-border/10 p-6 rounded-sm">
               <p className="text-xs tracking-[0.2em] uppercase text-foreground/40 font-sans mb-6">
@@ -197,7 +136,7 @@ const RunwaySection = () => {
                 Create Lobby
               </button>
             </div>
-          </div>
+          </ScrollReveal>
         </div>
       </div>
     </section>
