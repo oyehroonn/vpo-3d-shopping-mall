@@ -9,32 +9,29 @@ const RunwaySection = () => {
   ];
 
   return (
-    <section id="runway" className="relative z-10 bg-background border-t border-border/10">
-      <div className="max-w-[1600px] mx-auto px-6 md:px-10 py-16 md:py-24">
+    <section id="runway" className="relative z-10 bg-[#080808] text-stone-200 py-32 border-t border-white/10">
+      <div className="max-w-[1800px] mx-auto px-6 md:px-12">
         {/* Header */}
         <ScrollReveal>
-          <div className="flex flex-col md:flex-row md:items-end md:justify-between mb-10 md:mb-16">
+          <div className="flex flex-col md:flex-row justify-between items-end mb-20 border-b border-white/10 pb-6">
             <div>
-              <div className="flex items-center gap-2 mb-4">
-                <span className="text-xs tracking-[0.2em] uppercase text-foreground/50 font-sans">
-                  Live Broadcast
-                </span>
-                <span className="w-2 h-2 rounded-full bg-destructive animate-pulse" />
-              </div>
-              <h2 className="font-display text-4xl md:text-5xl lg:text-6xl text-foreground italic">
+              <span className="text-[10px] font-semibold text-red-700 uppercase tracking-[0.3em] mb-4 block">
+                Live Broadcast
+              </span>
+              <h2 className="text-5xl md:text-7xl font-serif tracking-tight leading-none">
                 The Runway
               </h2>
             </div>
 
             {/* Act Tabs */}
-            <div className="flex gap-6 mt-6 md:mt-0">
-              <button className="text-sm tracking-[0.15em] uppercase text-foreground pb-2 border-b border-foreground">
+            <div className="flex gap-8 mt-8 md:mt-0">
+              <button className="text-[10px] uppercase tracking-widest text-white border-b border-white pb-1">
                 Act I: Genesis
               </button>
-              <button className="text-sm tracking-[0.15em] uppercase text-foreground/40 hover:text-foreground/70 transition-colors pb-2 border-b border-transparent">
+              <button className="text-[10px] uppercase tracking-widest text-stone-500 hover:text-white transition-colors">
                 Act II: Void
               </button>
-              <button className="text-sm tracking-[0.15em] uppercase text-foreground/40 hover:text-foreground/70 transition-colors pb-2 border-b border-transparent">
+              <button className="text-[10px] uppercase tracking-widest text-stone-500 hover:text-white transition-colors">
                 Act III: Bloom
               </button>
             </div>
@@ -42,87 +39,83 @@ const RunwaySection = () => {
         </ScrollReveal>
 
         {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
           {/* Main Stage Image */}
-          <ScrollReveal direction="scale" className="lg:col-span-3">
-            <div className="relative group cursor-pointer overflow-hidden rounded-sm">
-              <div className="aspect-[16/10] lg:aspect-auto lg:h-[70vh] overflow-hidden">
-                <img
-                  src="https://images.unsplash.com/photo-1537832816519-689ad163238b?w=1600&q=90"
-                  alt="Runway show"
-                  className="w-full h-full object-cover opacity-80 group-hover:scale-[1.03] transition-transform duration-[3s]"
-                />
-              </div>
-
+          <ScrollReveal direction="scale" className="lg:col-span-9">
+            <div className="relative h-[70vh] w-full bg-[#111] overflow-hidden group">
               {/* Live Feed Indicator */}
-              <div className="absolute top-6 left-6 flex items-center gap-2 bg-background/60 backdrop-blur-sm px-3 py-1.5 rounded-full">
-                <span className="w-2 h-2 rounded-full bg-destructive animate-pulse" />
-                <span className="text-[10px] tracking-[0.15em] uppercase text-foreground/80 font-sans">
+              <div className="absolute top-6 left-6 z-20 flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-red-600 animate-pulse" />
+                <span className="text-[9px] uppercase tracking-widest text-white/80">
                   Live Feed • Cam 04
                 </span>
               </div>
 
-              {/* Bottom Gradient Overlay */}
-              <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-background/90 via-background/50 to-transparent" />
+              {/* Image */}
+              <img
+                src="https://images.unsplash.com/photo-1537832816519-689ad163238b?q=80&w=2659&auto=format&fit=crop"
+                alt="Runway Model"
+                className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-[2s]"
+              />
 
-              {/* Look Info */}
-              <div className="absolute bottom-6 left-6 right-6 flex items-end justify-between">
+              {/* Bottom Gradient Overlay */}
+              <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black/90 to-transparent z-20 flex justify-between items-end">
                 <div>
-                  <h3 className="font-display text-2xl text-foreground italic mb-2">
+                  <h3 className="text-2xl font-serif italic text-white mb-2">
                     Look 04: Obsidian Veil
                   </h3>
-                  <p className="text-xs text-muted-foreground font-mono">
+                  <p className="text-xs text-stone-400 font-mono">
                     Designed by Maison VPO
                   </p>
                 </div>
-                <button className="w-12 h-12 rounded-full border border-foreground/30 flex items-center justify-center hover:bg-foreground hover:text-background transition-colors duration-300 group/btn">
-                  <ShoppingBag className="w-5 h-5 text-foreground group-hover/btn:text-background transition-colors" />
+                <button className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center hover:bg-white hover:text-black transition-colors backdrop-blur-md">
+                  <ShoppingBag className="w-4 h-4" />
                 </button>
               </div>
             </div>
           </ScrollReveal>
 
           {/* Side Panel */}
-          <ScrollReveal direction="right" delay={0.2} className="lg:col-span-1 flex flex-col gap-6">
+          <ScrollReveal direction="right" delay={0.2} className="lg:col-span-3 flex flex-col justify-between h-full border-l border-white/5 pl-0 lg:pl-12">
             {/* Drop Schedule */}
-            <div className="bg-secondary/50 border border-border/10 p-6 rounded-sm">
-              <p className="text-xs tracking-[0.2em] uppercase text-foreground/40 font-sans mb-6">
+            <div>
+              <h4 className="text-lg font-serif italic mb-8 text-stone-400">
                 Drop Schedule
-              </p>
-              <div className="space-y-5">
+              </h4>
+              <ul className="space-y-6">
                 {scheduleItems.map((item, index) => (
-                  <div
+                  <li
                     key={index}
-                    className="group cursor-pointer opacity-60 hover:opacity-100 transition-opacity duration-300"
+                    className={`group cursor-pointer ${index > 0 ? 'opacity-50 hover:opacity-100' : ''} transition-opacity`}
                   >
-                    <div className="flex justify-between text-xs font-mono text-muted-foreground mb-1">
+                    <div className="flex justify-between text-xs font-mono text-stone-500 mb-1 group-hover:text-white transition-colors">
                       <span>{item.time}</span>
                       <span>{item.status}</span>
                     </div>
-                    <p className="text-sm font-light text-foreground/70 group-hover:text-foreground transition-colors duration-300 font-sans">
+                    <p className="text-sm font-light text-stone-300">
                       {item.label}
                     </p>
-                  </div>
+                  </li>
                 ))}
-              </div>
+              </ul>
             </div>
 
-            {/* Social Lobby Card */}
-            <div className="bg-secondary/50 border border-border/10 p-6 rounded-sm flex-1 flex flex-col">
+            {/* Lobby/Social Feature Teaser */}
+            <div className="mt-12 lg:mt-0 p-6 bg-white/5 border border-white/5 backdrop-blur-sm">
               <div className="flex items-center gap-3 mb-4">
                 <div className="flex -space-x-2">
-                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-muted to-secondary border-2 border-secondary" />
-                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-muted-foreground to-muted border-2 border-secondary" />
-                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-accent to-muted border-2 border-secondary" />
+                  <div className="w-6 h-6 rounded-full bg-stone-700 border border-black" />
+                  <div className="w-6 h-6 rounded-full bg-stone-600 border border-black" />
+                  <div className="w-6 h-6 rounded-full bg-stone-500 border border-black" />
                 </div>
-                <span className="text-xs text-foreground/50 font-sans">
+                <span className="text-[10px] uppercase tracking-wider text-stone-400">
                   12 Friends Online
                 </span>
               </div>
-              <p className="text-sm text-foreground/40 font-sans mb-6 leading-relaxed">
+              <p className="text-xs text-stone-400 mb-4 leading-relaxed">
                 Create a lobby to watch the show together and shop the collection in real-time.
               </p>
-              <button className="mt-auto w-full py-3 border border-foreground/20 text-sm tracking-[0.15em] uppercase text-foreground hover:bg-foreground hover:text-background transition-colors duration-300 font-sans">
+              <button className="w-full py-2 border border-white/20 text-[9px] uppercase tracking-widest hover:bg-white hover:text-black transition-colors">
                 Create Lobby
               </button>
             </div>
