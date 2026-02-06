@@ -1,4 +1,5 @@
 import ScrollReveal from "@/components/ScrollReveal";
+import ParallaxWrapper from "@/components/ParallaxWrapper";
 
 const JournalSection = () => {
   const articles = [
@@ -31,9 +32,11 @@ const JournalSection = () => {
         {/* Header */}
         <ScrollReveal>
           <div className="flex items-end justify-between mb-16 border-b border-stone-200 pb-6">
-            <h2 className="text-4xl md:text-5xl font-serif text-[#1a1918]">
-              The Journal
-            </h2>
+            <ParallaxWrapper speed={0.05} direction="up">
+              <h2 className="text-4xl md:text-5xl font-serif text-[#1a1918]">
+                The Journal
+              </h2>
+            </ParallaxWrapper>
             <a
               href="#"
               className="text-[10px] uppercase tracking-widest hover:opacity-60 transition-opacity"
@@ -48,18 +51,20 @@ const JournalSection = () => {
           {articles.map((article, index) => (
             <ScrollReveal key={index} delay={0.1 * index}>
               <article className="group cursor-pointer">
-                {/* Image Container */}
-                <div className="aspect-[4/5] w-full overflow-hidden mb-6 bg-stone-100 relative">
-                  <img
-                    src={article.image}
-                    alt={article.title}
-                    className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 ease-out"
-                  />
-                  {/* Category Badge */}
-                  <div className="absolute top-4 left-4 bg-white px-3 py-1 text-[9px] uppercase tracking-widest">
-                    {article.category}
+                {/* Image Container with Parallax */}
+                <ParallaxWrapper speed={0.04 + index * 0.02} direction="up">
+                  <div className="aspect-[4/5] w-full overflow-hidden mb-6 bg-stone-100 relative">
+                    <img
+                      src={article.image}
+                      alt={article.title}
+                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 ease-out"
+                    />
+                    {/* Category Badge */}
+                    <div className="absolute top-4 left-4 bg-white px-3 py-1 text-[9px] uppercase tracking-widest">
+                      {article.category}
+                    </div>
                   </div>
-                </div>
+                </ParallaxWrapper>
 
                 {/* Content */}
                 <div>
