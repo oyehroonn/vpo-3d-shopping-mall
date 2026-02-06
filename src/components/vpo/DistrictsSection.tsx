@@ -8,7 +8,7 @@ const DistrictsSection = () => {
   ];
 
   return (
-    <section id="spaces" className="bg-[#F5F5F0] relative overflow-hidden">
+    <section id="spaces" className="relative z-10 bg-[#F5F5F0] overflow-hidden">
       {/* Subtle Grid Pattern */}
       <div
         className="absolute inset-0 opacity-[0.03]"

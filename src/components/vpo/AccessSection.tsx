@@ -8,7 +8,7 @@ const AccessSection = () => {
   ];
 
   return (
-    <section id="account" className="bg-[#111111] border-t border-stone-800">
+    <section id="account" className="relative z-10 bg-[#111111] border-t border-stone-800">
       <div className="max-w-[1600px] mx-auto px-6 md:px-10 py-16 md:py-24">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
           {/* Left Column - Content */}

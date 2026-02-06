@@ -11,7 +11,7 @@ const WaitlistFooter = () => {
   };
 
   return (
-    <footer className="bg-[#050505] border-t border-white/5">
+    <footer className="relative z-10 bg-[#050505] border-t border-white/5">
       {/* Waitlist CTA */}
       <div className="max-w-[1600px] mx-auto px-6 md:px-10 py-24 md:py-32">
         <div className="max-w-xl mx-auto text-center">

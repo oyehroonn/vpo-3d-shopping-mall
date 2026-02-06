@@ -8,7 +8,7 @@ const RunwaySection = () => {
   ];
 
   return (
-    <section id="runway" className="bg-[#080808] border-t border-white/10">
+    <section id="runway" className="relative z-10 bg-[#080808] border-t border-white/10">
       <div className="max-w-[1600px] mx-auto px-6 md:px-10 py-16 md:py-24">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end md:justify-between mb-10 md:mb-16">
