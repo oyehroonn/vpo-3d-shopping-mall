@@ -1,79 +1,59 @@
 
-# Fix Current Selection Hover Image Behavior
 
-## Problems Identified
+# Premium Slow Zoom Effect for Runway Image
 
-1. **Image persists when scrolling**: When you scroll past the section, the `onMouseLeave` event never fires because the mouse doesn't physically leave - the element scrolls away beneath it. The image stays stuck on screen.
+## Current Implementation
 
-2. **Image disappears while hovering**: The current logic with `setTimeout` delays is causing race conditions where the image flickers or disappears unexpectedly.
+The image currently has:
+```jsx
+className="... group-hover:scale-105 transition-transform duration-[2s]"
+```
 
-## Solution
+This creates a 2-second zoom effect, but it still feels too fast and lacks the premium, cinematic quality you're looking for.
 
-### 1. Add Scroll Detection to Clear Image
+## Proposed Changes
 
-Use a `useEffect` hook with a scroll listener that checks if the cursor is still within a brand row. When scrolling occurs:
-- Get all brand row elements using refs
-- Check if the current mouse position is still within any brand row's bounding rectangle
-- If not, clear the hovered brand state
+### 1. Slower Duration
+Increase the transition duration from 2 seconds to **4-5 seconds** for a much more luxurious, slow-motion feel.
 
-### 2. Simplify Hover Logic
+### 2. Premium Easing Curve
+Add a custom cubic-bezier easing function that starts slow, accelerates slightly, then eases out - creating a more organic, premium motion:
+- Use `ease-out` or custom `cubic-bezier(0.25, 0.46, 0.45, 0.94)` for a refined feel
 
-Remove the problematic `setTimeout` delays that cause flickering:
-- Set `hoveredBrand` and `isVisible` directly on mouse enter
-- Clear both states directly on mouse leave
-- Let CSS transitions handle the smooth animation
+### 3. Subtle Scale Amount
+The current 105% scale is good, but we can keep it at 105-110% for maximum cinematic impact without being distracting.
 
-### 3. Track Mouse Position Globally
-
-Store mouse position in a ref (not just state) so we can check it during scroll events without triggering re-renders.
+### 4. Optional: Combine with Opacity
+Add a subtle opacity transition from 80% to 90% on hover to create a "fade inwards" brightening effect as you described.
 
 ## Technical Implementation
 
-### File: `src/components/vpo/CurrentSelectionSection.tsx`
+### File: `src/components/vpo/RunwaySection.tsx`
 
-**Changes:**
+**Line 58 changes:**
 
-1. Add `useRef` and `useEffect` imports
-2. Create a ref to track the section element
-3. Create a ref to store current mouse coordinates (for scroll checking)
-4. Add scroll event listener that:
-   - Gets the current cursor position
-   - Uses `document.elementFromPoint()` to check what element is under cursor
-   - If cursor is not over any brand row, clears the hover state
-5. Simplify `handleBrandHover` to remove race-condition-causing `setTimeout`:
-   - On enter: immediately set both `hoveredBrand` and `isVisible` to true
-   - On leave: immediately set `isVisible` to false, then clear `hoveredBrand` after animation
-6. Add cleanup for scroll listener on unmount
-
-```text
-Logic flow:
-┌─────────────────────────────────────────────────────────────┐
-│  Mouse enters brand row                                     │
-│  → Set hoveredBrand = brand.id                              │
-│  → Set isVisible = true                                     │
-│  → Image fades in (CSS transition handles animation)        │
-└─────────────────────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────────────────────┐
-│  Mouse leaves brand row (moves to another or empty space)   │
-│  → Set isVisible = false                                    │
-│  → Image fades out (CSS transition)                         │
-│  → After 500ms, clear hoveredBrand                          │
-└─────────────────────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────────────────────┐
-│  User scrolls (mouse stays still, elements move)            │
-│  → Scroll event fires                                       │
-│  → Check: is cursor still over a brand row?                 │
-│  → If YES: update hoveredBrand to that brand                │
-│  → If NO: clear states (image fades out)                    │
-└─────────────────────────────────────────────────────────────┘
+Current:
+```jsx
+className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-[2s]"
 ```
 
-## Summary
+Updated:
+```jsx
+className="w-full h-full object-cover opacity-80 group-hover:opacity-90 group-hover:scale-110 transition-all duration-[4s] ease-out"
+```
 
-| Issue | Solution |
-|-------|----------|
-| Image stays when scrolling past section | Add scroll listener to detect when cursor leaves brand rows |
-| Image disappears while hovering | Remove setTimeout delays, use direct state updates |
-| Smooth animation | Keep CSS transitions, they handle the visual smoothness |
+**Key changes:**
+- `duration-[2s]` → `duration-[4s]` - Doubles the animation time for a slower, more cinematic feel
+- `transition-transform` → `transition-all` - Enables both transform and opacity to animate
+- Added `group-hover:opacity-90` - Subtle brightening effect on hover (fade inwards)
+- `group-hover:scale-105` → `group-hover:scale-110` - Slightly larger zoom for more dramatic effect
+- Added `ease-out` - Premium easing that slows down naturally at the end
+
+## Expected Result
+
+When you hover over the runway image:
+1. The image will very slowly zoom in from 100% to 110% over 4 seconds
+2. Simultaneously, it will subtly brighten from 80% to 90% opacity
+3. The animation will feel cinematic and luxurious, matching high-fashion editorial standards
+4. When you move your mouse away, it will slowly reverse back to its original state
+
