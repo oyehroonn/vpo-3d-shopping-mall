@@ -57,34 +57,52 @@ const brands: Brand[] = [
 const CurrentSelectionSection = () => {
   const [hoveredBrand, setHoveredBrand] = useState<string | null>(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [isVisible, setIsVisible] = useState(false);
 
   const handleMouseMove = (e: React.MouseEvent) => {
     setMousePosition({ x: e.clientX, y: e.clientY });
   };
+
+  const handleBrandHover = (brandId: string | null) => {
+    if (brandId) {
+      setHoveredBrand(brandId);
+      // Slight delay before showing for smoother entrance
+      setTimeout(() => setIsVisible(true), 50);
+    } else {
+      setIsVisible(false);
+      // Clear the brand after the fade-out animation completes
+      setTimeout(() => setHoveredBrand(null), 500);
+    }
+  };
+
+  const currentImage = hoveredBrand 
+    ? brands.find((b) => b.id === hoveredBrand)?.imageUrl 
+    : null;
 
   return (
     <section 
       className="relative z-20 bg-background grain-overlay py-24 px-8 md:px-16 overflow-hidden" 
       onMouseMove={handleMouseMove}
     >
-      {/* Floating image on hover */}
-      {hoveredBrand && (
-        <div
-          className="fixed pointer-events-none z-50 w-64 h-80 transition-opacity duration-300"
-          style={{
-            left: mousePosition.x - 128,
-            top: mousePosition.y - 160,
-            opacity: 1,
-          }}
-        >
+      {/* Floating image on hover - always rendered but with opacity transition */}
+      <div
+        className="fixed pointer-events-none z-50 w-64 h-80"
+        style={{
+          left: mousePosition.x - 128,
+          top: mousePosition.y - 160,
+          opacity: isVisible && hoveredBrand ? 1 : 0,
+          transform: `rotate(-3deg) scale(${isVisible && hoveredBrand ? 1 : 0.9})`,
+          transition: 'opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
+        }}
+      >
+        {currentImage && (
           <img
-            src={brands.find((b) => b.id === hoveredBrand)?.imageUrl}
+            src={currentImage}
             alt=""
-            className="w-full h-full object-cover grayscale animate-float shadow-2xl"
-            style={{ transform: "rotate(-3deg)" }}
+            className="w-full h-full object-cover grayscale shadow-2xl"
           />
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Background "CURATED" text */}
       <div 
@@ -123,8 +141,8 @@ const CurrentSelectionSection = () => {
             >
               <div
                 className="brand-row cursor-pointer"
-                onMouseEnter={() => setHoveredBrand(brand.id)}
-                onMouseLeave={() => setHoveredBrand(null)}
+                onMouseEnter={() => handleBrandHover(brand.id)}
+                onMouseLeave={() => handleBrandHover(null)}
               >
                 <div className="flex items-center gap-8 md:gap-16">
                   <span className="text-sm text-muted-foreground font-sans w-8">
@@ -133,7 +151,7 @@ const CurrentSelectionSection = () => {
                   <h3
                     className={`text-4xl md:text-6xl lg:text-7xl font-serif ${
                       brand.isItalic ? "italic" : "font-normal tracking-wide"
-                    } text-foreground transition-opacity ${
+                    } text-foreground transition-opacity duration-300 ${
                       hoveredBrand && hoveredBrand !== brand.id ? "opacity-30" : "opacity-100"
                     }`}
                   >
@@ -145,7 +163,7 @@ const CurrentSelectionSection = () => {
                     {brand.location}
                   </span>
                   <ArrowUpRight 
-                    className={`w-5 h-5 transition-all ${
+                    className={`w-5 h-5 transition-all duration-300 ${
                       hoveredBrand === brand.id 
                         ? "text-foreground translate-x-1 -translate-y-1" 
                         : "text-muted-foreground"
