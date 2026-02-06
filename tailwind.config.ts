@@ -15,6 +15,7 @@ export default {
     extend: {
       fontFamily: {
         serif: ['Cormorant Garamond', 'Georgia', 'serif'],
+        display: ['Playfair Display', 'Cormorant Garamond', 'Georgia', 'serif'],
         sans: ['Instrument Sans', 'system-ui', 'sans-serif'],
       },
       colors: {
@@ -97,6 +98,10 @@ export default {
           "0%, 100%": { transform: "translateY(0) rotate(-2deg)" },
           "50%": { transform: "translateY(-10px) rotate(2deg)" },
         },
+        "shimmer": {
+          "0%": { transform: "translateX(-100%)" },
+          "100%": { transform: "translateX(100%)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -104,6 +109,7 @@ export default {
         "ticker": "ticker 30s linear infinite",
         "fade-up": "fade-up 0.6s ease-out forwards",
         "float": "float 6s ease-in-out infinite",
+        "shimmer": "shimmer 2s infinite",
       },
     },
   },

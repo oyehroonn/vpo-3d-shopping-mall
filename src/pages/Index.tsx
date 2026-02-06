@@ -9,7 +9,11 @@ import ManifestoSection from "@/components/vpo/ManifestoSection";
 import SpacesSection from "@/components/vpo/SpacesSection";
 import CurrentSelectionSection from "@/components/vpo/CurrentSelectionSection";
 import QuoteSection from "@/components/vpo/QuoteSection";
-import Footer from "@/components/vpo/Footer";
+import RunwaySection from "@/components/vpo/RunwaySection";
+import DistrictsSection from "@/components/vpo/DistrictsSection";
+import AccessSection from "@/components/vpo/AccessSection";
+import JournalSection from "@/components/vpo/JournalSection";
+import WaitlistFooter from "@/components/vpo/WaitlistFooter";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -51,7 +55,11 @@ const Index = () => {
       <CurrentSelectionSection />
       <FrameSequenceScene2 />
       <QuoteSection />
-      <Footer />
+      <RunwaySection />
+      <DistrictsSection />
+      <AccessSection />
+      <JournalSection />
+      <WaitlistFooter />
     </main>
   );
 };
