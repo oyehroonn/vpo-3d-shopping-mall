@@ -169,7 +169,7 @@ const FrameSequenceScene2 = () => {
   return (
     <div
       ref={containerRef}
-      className="relative h-screen w-full overflow-hidden bg-background z-0"
+      className="relative z-20 h-screen w-full overflow-hidden bg-background"
     >
       {isLoading ? (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-background">
