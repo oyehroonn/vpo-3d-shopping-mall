@@ -50,7 +50,7 @@ const RunwaySection = () => {
                 <img
                   src="https://images.unsplash.com/photo-1537832816519-689ad163238b?w=1600&q=90"
                   alt="Runway show"
-                  className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-[2s] ease-out"
+                  className="w-full h-full object-cover opacity-80 group-hover:scale-[1.03] transition-transform duration-[3s]"
                 />
               </div>
 
@@ -68,10 +68,10 @@ const RunwaySection = () => {
               {/* Look Info */}
               <div className="absolute bottom-6 left-6 right-6 flex items-end justify-between">
                 <div>
-                  <p className="font-display text-xl md:text-2xl text-foreground italic mb-1">
+                  <h3 className="font-display text-2xl text-foreground italic mb-2">
                     Look 04: Obsidian Veil
-                  </p>
-                  <p className="text-xs tracking-[0.15em] uppercase text-foreground/50 font-sans">
+                  </h3>
+                  <p className="text-xs text-muted-foreground font-mono">
                     Designed by Maison VPO
                   </p>
                 </div>
@@ -93,23 +93,13 @@ const RunwaySection = () => {
                 {scheduleItems.map((item, index) => (
                   <div
                     key={index}
-                    className="group cursor-pointer opacity-50 hover:opacity-100 transition-opacity duration-300"
+                    className="group cursor-pointer opacity-60 hover:opacity-100 transition-opacity duration-300"
                   >
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-[10px] tracking-[0.1em] uppercase text-foreground/60 font-sans">
-                        {item.time}
-                      </span>
-                      <span
-                        className={`text-[9px] tracking-[0.1em] uppercase font-sans px-1.5 py-0.5 rounded ${
-                          item.status === "Live"
-                            ? "bg-destructive/20 text-destructive"
-                            : "bg-foreground/10 text-foreground/40"
-                        }`}
-                      >
-                        {item.status}
-                      </span>
+                    <div className="flex justify-between text-xs font-mono text-muted-foreground mb-1">
+                      <span>{item.time}</span>
+                      <span>{item.status}</span>
                     </div>
-                    <p className="text-sm text-muted-foreground group-hover:text-foreground transition-colors duration-300 font-sans">
+                    <p className="text-sm font-light text-foreground/70 group-hover:text-foreground transition-colors duration-300 font-sans">
                       {item.label}
                     </p>
                   </div>
