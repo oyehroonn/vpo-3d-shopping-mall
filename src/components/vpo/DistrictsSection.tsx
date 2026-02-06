@@ -1,82 +1,15 @@
-import { useEffect, useRef } from "react";
 import { ArrowRight, MapPin } from "lucide-react";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-
-gsap.registerPlugin(ScrollTrigger);
+import ScrollReveal from "@/components/ScrollReveal";
 
 const DistrictsSection = () => {
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const headerRef = useRef<HTMLDivElement>(null);
-  const sidebarRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<HTMLDivElement>(null);
-
   const brands = [
     "Comme des Garçons",
     "Issey Miyake",
     "Yohji Yamamoto",
   ];
 
-  useEffect(() => {
-    const section = sectionRef.current;
-    const header = headerRef.current;
-    const sidebar = sidebarRef.current;
-    const map = mapRef.current;
-
-    if (!section || !header || !sidebar) return;
-
-    const ctx = gsap.context(() => {
-      // Header fade in
-      gsap.set(header, { opacity: 0, y: 40 });
-      gsap.to(header, {
-        opacity: 1,
-        y: 0,
-        duration: 0.8,
-        ease: "power2.out",
-        scrollTrigger: {
-          trigger: section,
-          start: "top 75%",
-          toggleActions: "play none none reverse",
-        },
-      });
-
-      // Sidebar slide in from left
-      gsap.set(sidebar, { opacity: 0, x: -60 });
-      gsap.to(sidebar, {
-        opacity: 1,
-        x: 0,
-        duration: 0.8,
-        ease: "power2.out",
-        scrollTrigger: {
-          trigger: section,
-          start: "top 65%",
-          toggleActions: "play none none reverse",
-        },
-      });
-
-      // Map fade and scale
-      if (map) {
-        gsap.set(map, { opacity: 0, scale: 0.9 });
-        gsap.to(map, {
-          opacity: 1,
-          scale: 1,
-          duration: 1,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: section,
-            start: "top 60%",
-            toggleActions: "play none none reverse",
-          },
-        });
-      }
-
-    }, section);
-
-    return () => ctx.revert();
-  }, []);
-
   return (
-    <section ref={sectionRef} id="spaces" className="relative z-10 bg-light overflow-hidden">
+    <section id="spaces" className="relative z-10 bg-light overflow-hidden">
       {/* Subtle Grid Pattern */}
       <div
         className="absolute inset-0 opacity-[0.03]"
@@ -88,19 +21,21 @@ const DistrictsSection = () => {
 
       <div className="max-w-[1600px] mx-auto px-6 md:px-10 py-16 md:py-24 relative">
         {/* Header */}
-        <div ref={headerRef} className="text-center mb-12 md:mb-20">
-          <span className="text-xs tracking-[0.3em] uppercase text-light font-sans block mb-4">
-            World Navigation
-          </span>
-          <h2 className="font-display text-4xl md:text-5xl lg:text-6xl text-light italic">
-            Districts & Ateliers
-          </h2>
-        </div>
+        <ScrollReveal>
+          <div className="text-center mb-12 md:mb-20">
+            <span className="text-xs tracking-[0.3em] uppercase text-vpo-subtle font-sans block mb-4">
+              World Navigation
+            </span>
+            <h2 className="font-display text-4xl md:text-5xl lg:text-6xl text-light italic">
+              Districts & Ateliers
+            </h2>
+          </div>
+        </ScrollReveal>
 
         {/* Two Column Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
           {/* Left Sidebar - District Info */}
-          <div ref={sidebarRef} className="lg:col-span-1">
+          <ScrollReveal direction="left" className="lg:col-span-1">
             <div className="bg-background border border-border/20 p-8 rounded-sm">
               <div className="flex items-center gap-2 mb-6">
                 <span className="w-2 h-2 rounded-full bg-[hsl(var(--vpo-secure))]" />
@@ -139,10 +74,10 @@ const DistrictsSection = () => {
                 <MapPin className="w-4 h-4" />
               </button>
             </div>
-          </div>
+          </ScrollReveal>
 
           {/* Right Side - Map Area */}
-          <div ref={mapRef} className="lg:col-span-2 relative min-h-[400px] lg:min-h-[500px] hidden lg:block">
+          <ScrollReveal direction="scale" delay={0.2} className="lg:col-span-2 relative min-h-[400px] lg:min-h-[500px] hidden lg:block">
             {/* Abstract Map SVG */}
             <svg
               className="absolute inset-0 w-full h-full"
@@ -207,7 +142,7 @@ const DistrictsSection = () => {
                 </div>
               </div>
             </div>
-          </div>
+          </ScrollReveal>
         </div>
       </div>
     </section>
