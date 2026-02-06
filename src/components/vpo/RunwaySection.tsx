@@ -55,7 +55,7 @@ const RunwaySection = () => {
               <img
                 src="https://images.unsplash.com/photo-1537832816519-689ad163238b?q=80&w=2659&auto=format&fit=crop"
                 alt="Runway Model"
-                className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-[2s]"
+                className="w-full h-full object-cover opacity-80 group-hover:opacity-90 group-hover:scale-110 transition-all duration-[4s] ease-out"
               />
 
               {/* Bottom Gradient Overlay */}
