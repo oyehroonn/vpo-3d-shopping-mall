@@ -26,7 +26,7 @@ const JournalSection = () => {
   ];
 
   return (
-    <section id="journal" className="relative z-10 py-32 bg-[#FDFBF7] border-t border-stone-200">
+    <section id="journal" className="relative z-10 py-32 bg-[#FDFBF7] text-[#1a1918] border-t border-stone-200">
       <div className="max-w-[1800px] mx-auto px-6 md:px-12">
         {/* Header */}
         <ScrollReveal>
@@ -66,7 +66,7 @@ const JournalSection = () => {
                   <span className="text-[9px] text-stone-400 uppercase tracking-widest block mb-2">
                     {article.date}
                   </span>
-                  <h3 className="text-xl font-serif italic mb-3 group-hover:underline decoration-1 underline-offset-4 decoration-stone-300">
+                  <h3 className="text-xl font-serif italic text-[#1a1918] mb-3 group-hover:underline decoration-1 underline-offset-4 decoration-stone-300">
                     {article.title}
                   </h3>
                   <p className="text-xs text-stone-500 font-light leading-relaxed line-clamp-2">
