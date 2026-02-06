@@ -83,7 +83,7 @@ const SpacesSection = () => {
   }, []);
 
   return (
-    <section ref={sectionRef} className="relative z-10 min-h-screen overflow-hidden">
+    <section ref={sectionRef} className="relative z-20 min-h-screen overflow-hidden bg-background">
       {/* Location badge */}
       <div 
         ref={badgeRef}
