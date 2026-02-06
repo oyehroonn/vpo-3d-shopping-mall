@@ -96,7 +96,7 @@ const ManifestoSection = () => {
   return (
     <section 
       ref={sectionRef}
-      className="min-h-screen bg-background grain-overlay py-32 px-8 md:px-16 flex items-center overflow-hidden"
+      className="relative z-10 min-h-screen bg-background grain-overlay py-32 px-8 md:px-16 flex items-center overflow-hidden"
     >
       <div className="w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24">
         {/* Left - Headline */}
