@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { ArrowUpRight, ArrowDown } from "lucide-react";
 import ScrollReveal from "@/components/ScrollReveal";
 
@@ -58,20 +58,52 @@ const CurrentSelectionSection = () => {
   const [hoveredBrand, setHoveredBrand] = useState<string | null>(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isVisible, setIsVisible] = useState(false);
+  
+  // Ref to track mouse position for scroll detection
+  const mousePositionRef = useRef({ x: 0, y: 0 });
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    setMousePosition({ x: e.clientX, y: e.clientY });
+    const pos = { x: e.clientX, y: e.clientY };
+    setMousePosition(pos);
+    mousePositionRef.current = pos;
   };
+
+  // Scroll listener to detect when cursor leaves brand rows during scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      const { x, y } = mousePositionRef.current;
+      const elementUnderCursor = document.elementFromPoint(x, y);
+      
+      // Check if the element under cursor is within a brand row
+      const brandRow = elementUnderCursor?.closest('.brand-row');
+      
+      if (!brandRow) {
+        // Cursor is no longer over any brand row, clear the hover state
+        setIsVisible(false);
+        setHoveredBrand(null);
+      } else {
+        // Find which brand the cursor is now over
+        const brandId = brandRow.getAttribute('data-brand-id');
+        if (brandId && brandId !== hoveredBrand) {
+          setHoveredBrand(brandId);
+          setIsVisible(true);
+        }
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [hoveredBrand]);
 
   const handleBrandHover = (brandId: string | null) => {
     if (brandId) {
+      // Immediately show the image
       setHoveredBrand(brandId);
-      // Slight delay before showing for smoother entrance
-      setTimeout(() => setIsVisible(true), 50);
+      setIsVisible(true);
     } else {
+      // Immediately hide the image
       setIsVisible(false);
-      // Clear the brand after the fade-out animation completes
-      setTimeout(() => setHoveredBrand(null), 500);
+      setHoveredBrand(null);
     }
   };
 
@@ -141,6 +173,7 @@ const CurrentSelectionSection = () => {
             >
               <div
                 className="brand-row cursor-pointer"
+                data-brand-id={brand.id}
                 onMouseEnter={() => handleBrandHover(brand.id)}
                 onMouseLeave={() => handleBrandHover(null)}
               >
