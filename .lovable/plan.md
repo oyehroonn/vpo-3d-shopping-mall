@@ -1,98 +1,199 @@
 
 
-# Fix Frame Sequence Scroll Timing
+# Premium Typography & Effects Refinement Plan
 
-## Problem Identified
+## Analysis: Key Differences Found
 
-The `FrameSequenceScene2` currently uses **GSAP ScrollTrigger with scrub**, which means the animation progress is tied directly to the scroll position of the page. This causes two issues:
+After thorough comparison of the reference HTML with our current implementation, here are the exact differences that need to be addressed:
 
-1. **Early triggering**: The ScrollTrigger starts calculating animation progress as soon as the container enters the viewport area, even while you're still scrolling through the `CurrentSelectionSection` above it
-2. **Passive scroll control**: The animation advances based on global page scroll, not based on whether your mouse is hovering over the experience
+---
 
-## Root Cause
+## 1. Districts Section - Brand List Typography
 
-The current implementation uses:
-```javascript
-scrollTrigger: {
-  trigger: container,
-  start: "top top",
-  scrub: 1.5,  // This ties animation to global scroll position
-  pin: true,
-  ...
+### Reference HTML (lines 207-219):
+```html
+<div class="flex items-center justify-between border-b border-stone-200 pb-2 cursor-pointer group">
+    <span class="text-xs font-medium">Comme des Garçons</span>
+    <i data-lucide="arrow-right" class="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+</div>
+```
+
+### Current Implementation:
+- Uses `text-sm text-foreground/70` (14px, 70% opacity)
+- Uses `py-3` padding (larger vertical spacing)
+- Arrow icon uses `w-4 h-4` (16px)
+
+### Issues:
+| Property | Reference | Current |
+|----------|-----------|---------|
+| Font size | `text-xs` (12px) | `text-sm` (14px) |
+| Font weight | `font-medium` | normal (no weight specified) |
+| Text color | solid black | `foreground/70` (muted) |
+| Vertical padding | `pb-2` (8px) | `py-3` (12px top & bottom) |
+| Arrow size | `w-3 h-3` (12px) | `w-4 h-4` (16px) |
+
+---
+
+## 2. Districts Section - Title Typography
+
+### Reference HTML (line 202):
+```html
+<h3 class="text-4xl serif mb-6">District 01: <br> <span class="italic text-stone-400">Neo-Tokyo</span></h3>
+```
+
+### Current Implementation:
+```tsx
+<h3 className="font-display text-2xl md:text-3xl text-foreground italic mb-4">
+```
+
+### Issues:
+| Property | Reference | Current |
+|----------|-----------|---------|
+| Font size | `text-4xl` (36px) | `text-2xl md:text-3xl` (24-30px) |
+| Title style | Only "Neo-Tokyo" is italic | Entire heading is italic |
+| Margin | `mb-6` | `mb-4` |
+
+---
+
+## 3. Runway Section - Image Hover Effect
+
+### Reference HTML (line 124):
+```html
+<img src="..." class="... group-hover:scale-105 transition-transform duration-[2s]">
+```
+
+### Current Implementation:
+```tsx
+className="... group-hover:scale-105 transition-transform duration-[2s] ease-out"
+```
+
+### Issue:
+The duration is actually the same (2s), but the reference uses the default easing while we added `ease-out`. However, the user feels it's too fast. The reference scales to 105% in 2s - we should try a subtler, slower approach for a more premium feel.
+
+---
+
+## 4. Runway Section - "Look 04" Title Typography
+
+### Reference HTML (line 115):
+```html
+<h3 class="text-2xl serif italic text-white mb-2">Look 04: Obsidian Veil</h3>
+<p class="text-xs text-stone-400 font-mono">Designed by Maison VPO</p>
+```
+
+### Current Implementation:
+```tsx
+<p className="font-display text-xl md:text-2xl text-foreground italic mb-1">
+<p className="text-xs tracking-[0.15em] uppercase text-foreground/50 font-sans">
+```
+
+### Issues:
+| Property | Reference | Current |
+|----------|-----------|---------|
+| Look title size | `text-2xl` fixed | `text-xl md:text-2xl` |
+| Look title margin | `mb-2` | `mb-1` |
+| Designer subtitle | `font-mono`, NOT uppercase | `font-sans`, uppercase with letter-spacing |
+
+---
+
+## 5. Runway Section - Schedule Items
+
+### Reference HTML (lines 134-145):
+```html
+<div class="flex justify-between text-xs font-mono text-stone-500 mb-1">
+    <span>09:00 EST</span>
+    <span>Live</span>
+</div>
+<p class="text-sm font-light text-stone-300">The Black Coat Collection</p>
+```
+
+### Current Implementation:
+Uses separate styled status badges and different font styling.
+
+---
+
+## 6. Journal Section - Article Titles
+
+### Reference HTML (line 369):
+```html
+<h3 class="text-xl serif italic mb-3 group-hover:underline decoration-1 underline-offset-4 decoration-stone-300">
+```
+
+### Current Implementation:
+```tsx
+<h3 className="font-display text-xl md:text-2xl text-light italic mb-3 group-hover:underline decoration-1 underline-offset-4 decoration-vpo-subtle/30">
+```
+
+### Issue:
+Size is similar but reference uses fixed `text-xl` (20px), not responsive sizing.
+
+---
+
+## Implementation Plan
+
+### File: `src/components/vpo/DistrictsSection.tsx`
+
+1. **Brand list typography refinement:**
+   - Change `text-sm` to `text-xs`
+   - Add `font-medium`
+   - Remove opacity from text color
+   - Change `py-3` to `pb-2`
+   - Reduce arrow icon from `w-4 h-4` to `w-3 h-3`
+
+2. **District title refinement:**
+   - Increase size to `text-3xl md:text-4xl`
+   - Move italic only to "Neo-Tokyo" span
+   - Increase margin to `mb-6`
+
+### File: `src/components/vpo/RunwaySection.tsx`
+
+1. **Slow down image hover effect:**
+   - Change duration from `duration-[2s]` to `duration-[3s]`
+   - Use subtler scale: `scale-[1.03]` instead of `scale-105`
+
+2. **Designer credit typography:**
+   - Remove uppercase transformation
+   - Add `font-mono` class for monospace font
+   - Remove letter-spacing
+
+3. **Look title refinement:**
+   - Use consistent `text-2xl` size
+   - Change margin from `mb-1` to `mb-2`
+
+### File: `src/index.css`
+
+Add monospace font to the font stack:
+
+```css
+@import url('https://fonts.googleapis.com/css2?family=... &family=IBM+Plex+Mono:wght@300;400&display=swap');
+
+--font-mono: 'IBM Plex Mono', monospace;
+```
+
+Add utility class:
+```css
+.font-mono {
+  font-family: var(--font-mono);
 }
 ```
 
-This approach calculates frame progress based on how far you've scrolled past the trigger point - but scroll distance is accumulated even while you're scrolling through sections above it (due to content overlapping with the pinned container).
+---
 
-## Solution
+## Summary of Changes
 
-Convert `FrameSequenceScene2` to use the **hover-based wheel event** approach, matching the pattern already established in `ExperienceContainer`. This means:
-
-1. **Remove GSAP ScrollTrigger scrub** - Stop tying animation to global scroll position
-2. **Add hover detection** - Track when mouse is over the container
-3. **Use wheel event listener** - Only advance frames when hovering AND scrolling
-4. **Allow scroll passthrough at boundaries** - When at frame 0 (scrolling up) or frame 250 (scrolling down), let normal page scrolling resume
+| Component | Change | Impact |
+|-----------|--------|--------|
+| DistrictsSection | Brand names: smaller, bolder, tighter spacing | Matches reference's refined look |
+| DistrictsSection | District title: larger, split italic styling | Better visual hierarchy |
+| RunwaySection | Image zoom: 3s duration, subtler 1.03x scale | Premium, slow-motion effect |
+| RunwaySection | Designer credit: monospace, no uppercase | Matches editorial reference |
+| CSS | Add monospace font family | Enables font-mono utility |
 
 ---
 
-## Technical Implementation
+## Technical Notes
 
-### File: `src/components/FrameSequenceScene2.tsx`
-
-**Changes:**
-
-1. **Add hover state tracking**
-   - Add `isHovering` state with `useState`
-   - Add `onMouseEnter` and `onMouseLeave` handlers to the container
-
-2. **Replace ScrollTrigger animation with wheel event handler**
-   - Remove the GSAP timeline with ScrollTrigger scrub
-   - Add a wheel event listener that only activates when `isHovering` is true
-   - Implement boundary detection to allow normal scroll when at frame 0 or 250
-
-3. **Handle mobile touch events**
-   - Add touch start/move handlers for mobile devices
-   - Same boundary logic for touch scrolling
-
-4. **Visual feedback**
-   - Add a "Scroll to explore" indicator that appears on hover
-   - Show a progress indicator during the experience
-
-**Key code pattern (from ExperienceContainer):**
-```text
-const handleWheel = (e: WheelEvent) => {
-  if (!isHovering) return; // Only capture when hovering
-  
-  // At end, scrolling down -> let page scroll
-  if (currentFrame >= maxFrame && delta > 0) return;
-  
-  // At start, scrolling up -> let page scroll  
-  if (currentFrame <= 0 && delta < 0) return;
-  
-  // Otherwise, capture scroll for animation
-  e.preventDefault();
-  // ... advance/reverse frames
-};
-```
-
----
-
-## Expected Behavior After Fix
-
-1. You scroll down through `CurrentSelectionSection` normally
-2. `FrameSequenceScene2` comes into view showing **frame 0** (first frame)
-3. When your mouse hovers over the experience and you scroll:
-   - Animation advances through frames 0-250
-4. When animation reaches frame 250 and you continue scrolling down:
-   - Normal page scrolling resumes, taking you to the next section
-5. If you scroll up at frame 0:
-   - Normal page scrolling resumes, taking you back to `CurrentSelectionSection`
-
----
-
-## Files to Modify
-
-| File | Changes |
-|------|---------|
-| `src/components/FrameSequenceScene2.tsx` | Replace ScrollTrigger scrub with hover-based wheel events |
+- All changes are typography and timing tweaks - no structural changes
+- The monospace font adds subtle editorial authenticity
+- Slower animations create the "premium" feel the reference achieves
+- Smaller brand names create better visual balance with the map
 
