@@ -68,7 +68,7 @@ const JournalSection = () => {
                   <span className="text-xs text-vpo-subtle font-sans block mb-2">
                     {article.date}
                   </span>
-                  <h3 className="font-display text-xl md:text-2xl text-light italic mb-3 group-hover:underline decoration-1 underline-offset-4 decoration-vpo-subtle/30">
+                  <h3 className="font-display text-xl text-light italic mb-3 group-hover:underline decoration-1 underline-offset-4 decoration-vpo-subtle/30">
                     {article.title}
                   </h3>
                   <p className="text-sm text-vpo-subtle font-sans leading-relaxed">

@@ -44,10 +44,10 @@ const DistrictsSection = () => {
                 </span>
               </div>
 
-              <h3 className="font-display text-2xl md:text-3xl text-foreground italic mb-4">
+              <h3 className="font-display text-3xl md:text-4xl text-foreground mb-6">
                 District 01:{" "}
                 <br className="hidden md:block" />
-                Neo-Tokyo
+                <span className="italic text-muted-foreground">Neo-Tokyo</span>
               </h3>
 
               <p className="text-sm text-muted-foreground font-sans leading-relaxed mb-8">
@@ -55,16 +55,16 @@ const DistrictsSection = () => {
               </p>
 
               {/* Brand List */}
-              <div className="space-y-3 mb-8">
+              <div className="space-y-0 mb-8">
                 {brands.map((brand, index) => (
                   <div
                     key={index}
-                    className="group cursor-pointer flex items-center justify-between py-3 border-b border-border/30 last:border-b-0"
+                    className="group cursor-pointer flex items-center justify-between pb-2 pt-2 border-b border-border/30 last:border-b-0"
                   >
-                    <span className="text-sm text-foreground/70 font-sans group-hover:text-foreground transition-colors">
+                    <span className="text-xs font-medium text-foreground font-sans group-hover:text-foreground/80 transition-colors">
                       {brand}
                     </span>
-                    <ArrowRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <ArrowRight className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
                 ))}
               </div>
