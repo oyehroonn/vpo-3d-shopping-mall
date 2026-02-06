@@ -1,87 +1,89 @@
 
 
-# Premium Cinematic Zoom Effect for Runway Image
+# Make Scroll Animations Reversible and Repeatable
 
-## Problem Analysis
+## Problem
 
-The current implementation uses `ease-out` which starts the animation at full speed, then slows down. This makes the initial movement feel "instant" even though the full animation is 4 seconds. For a truly premium, sleek effect, we need:
+Currently, scroll animations only play once and stay in their "revealed" state. When you scroll up and back down, the animations don't replay because:
 
-1. A custom easing curve that starts very slowly
-2. A longer duration for maximum cinematic impact
-3. Potentially using will-change for smoother GPU-accelerated rendering
+1. The `ScrollReveal` component uses `observer.unobserve()` after the first reveal - it stops watching after animating once
+2. The `revealed` class is added but never removed when scrolling away
+3. The GSAP hooks use `toggleActions: "play none none none"` which means "play on enter, do nothing on leave/re-enter"
 
-## Solution: Ultra-Premium Cinematic Effect
+## Solution
 
-### Custom Cubic-Bezier Easing
+Update the animation logic to support **reversible animations** that:
+- Play when scrolling down into view
+- Reverse (fade out) when scrolling back up past the element  
+- Replay when scrolling down again
 
-Instead of `ease-out`, we'll use a custom easing curve that:
-- Starts extremely slowly (creating anticipation)
-- Gradually accelerates in the middle
-- Eases out gently at the end
+## Technical Changes
 
-Recommended curve: `cubic-bezier(0.05, 0.5, 0.3, 1)` - This creates a "slow build" effect that feels luxurious and intentional.
+### 1. Update ScrollReveal Component
 
-### Implementation Details
+**File: `src/components/ScrollReveal.tsx`**
 
-**File: `src/components/vpo/RunwaySection.tsx`**
-
-Update line 58 with inline style for the custom cubic-bezier (since Tailwind doesn't support custom easing):
-
-```jsx
-<img
-  src="https://images.unsplash.com/..."
-  alt="Runway Model"
-  className="w-full h-full object-cover opacity-80 group-hover:opacity-90 group-hover:scale-110"
-  style={{
-    transition: 'transform 5s cubic-bezier(0.05, 0.5, 0.3, 1), opacity 3s cubic-bezier(0.05, 0.5, 0.3, 1)',
-    willChange: 'transform, opacity'
-  }}
-/>
-```
-
-**Key Changes:**
-- Transform duration: 5 seconds (for the ultra-slow zoom)
-- Opacity duration: 3 seconds (slightly faster for the fade-in)
-- Custom easing: `cubic-bezier(0.05, 0.5, 0.3, 1)` - starts at only 5% speed, accelerates gradually
-- Added `willChange: 'transform, opacity'` for GPU acceleration and smoother rendering
-
-### Visual Timeline
+- Remove `observer.unobserve()` so it keeps watching the element
+- Add logic to **remove** the `revealed` class when element leaves viewport (scrolling up)
+- Check `entry.isIntersecting` for both true (entering) and false (leaving)
 
 ```text
-Time:     0s -------- 1s -------- 2s -------- 3s -------- 4s -------- 5s
-          |           |           |           |           |           |
-Zoom:     100% ------ 101% ------ 103% ------ 106% ------ 108% ------ 110%
-          ↑           ↑           ↑           ↑           ↑           ↑
-          Start       Slow        Building    Faster      Slowing     End
-          (barely     climb       momentum    now         down        (settled)
-          moving)
+Current Logic:
+  Element enters viewport → Add "revealed" → Stop watching
+
+New Logic:
+  Element enters viewport → Add "revealed" 
+  Element exits viewport (upward) → Remove "revealed"
+  Element re-enters → Add "revealed" again
+  (Continues watching forever)
 ```
 
-### Alternative: Add to Global CSS
+### 2. Update useScrollReveal Hook
 
-If you prefer keeping styles in CSS rather than inline, we can also add a custom utility class in `src/index.css`:
+**File: `src/hooks/useScrollReveal.ts`**
+
+Change `toggleActions` from `"play none none none"` to `"play none none reverse"`:
+
+| Action | Current | New |
+|--------|---------|-----|
+| onEnter | play | play |
+| onLeave | none | none |
+| onEnterBack | none | none |
+| onLeaveBack | none | reverse |
+
+This means:
+- **play** when scrolling down past the trigger
+- **reverse** when scrolling back up past the trigger
+
+### 3. Update useScrollRevealRefs Hook
+
+**File: `src/hooks/useScrollReveal.ts`**
+
+- Remove the `hasAnimated.current` flag that prevents re-animation
+- Change `toggleActions` to `"play none none reverse"`
+
+## CSS Already Supports This
+
+The CSS in `index.css` already has transitions defined for both directions - when the `revealed` class is removed, the element will smoothly animate back to its hidden state:
 
 ```css
-.runway-zoom-premium {
-  transition: transform 5s cubic-bezier(0.05, 0.5, 0.3, 1), 
-              opacity 3s cubic-bezier(0.05, 0.5, 0.3, 1);
-  will-change: transform, opacity;
+.reveal {
+  opacity: 0;
+  transform: translateY(60px);
+  transition: opacity 0.8s ..., transform 0.8s ...;
+}
+
+.reveal.revealed {
+  opacity: 1;
+  transform: translateY(0);
 }
 ```
 
-Then apply it:
-```jsx
-className="... runway-zoom-premium group-hover:opacity-90 group-hover:scale-110"
-```
+## Summary of Changes
 
-## Summary
-
-| Aspect | Current | Premium Update |
-|--------|---------|----------------|
-| Duration | 4s | 5s (transform), 3s (opacity) |
-| Easing | ease-out (starts fast) | cubic-bezier(0.05, 0.5, 0.3, 1) (starts very slow) |
-| GPU Acceleration | None | will-change: transform, opacity |
-| Feel | Quick start, slow end | Slow build, luxurious motion |
-
-This creates that "fashion editorial" feel where the zoom seems to creep in almost imperceptibly at first, then gracefully settles into its final position.
+| File | Change |
+|------|--------|
+| `ScrollReveal.tsx` | Keep observing, toggle `revealed` class based on visibility |
+| `useScrollReveal.ts` | Change toggleActions to "play none none reverse" |
+| `useScrollReveal.ts` | Remove hasAnimated flag from useScrollRevealRefs |
 
