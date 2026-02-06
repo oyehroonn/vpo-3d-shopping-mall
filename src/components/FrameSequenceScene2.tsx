@@ -115,10 +115,13 @@ const FrameSequenceScene2 = () => {
     resizeCanvas();
     window.addEventListener("resize", resizeCanvas);
 
-    // Calculate scroll distance - minimal padding after animation
+    // Calculate scroll distance
     const scrollPerFrame = 8;
     const totalScrollDistance = images.length * scrollPerFrame;
 
+    // Reset frame index to 0 before setting up animation
+    frameIndexRef.current.value = 0;
+    
     // Render first frame immediately
     renderFrame(0);
 
@@ -128,13 +131,19 @@ const FrameSequenceScene2 = () => {
         start: "top top",
         end: `+=${totalScrollDistance}`,
         pin: true,
-        pinSpacing: false,
-        scrub: 1.5, // Smoother scrubbing
+        pinSpacing: true, // Enable pin spacing to prevent early trigger
+        scrub: 1.5,
         anticipatePin: 1,
+        onEnter: () => {
+          // Reset to first frame when entering
+          frameIndexRef.current.value = 0;
+          renderFrame(0);
+        },
         onLeave: () => {
           renderFrame(images.length - 1);
         },
         onLeaveBack: () => {
+          frameIndexRef.current.value = 0;
           renderFrame(0);
         },
         onEnterBack: () => {
