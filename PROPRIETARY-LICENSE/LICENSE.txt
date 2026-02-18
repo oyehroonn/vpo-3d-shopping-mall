@@ -1,0 +1,24 @@
+PROPRIETARY LICENSE
+===================
+
+Copyright (c) TechRealm and Haroon Ajmal. All Rights Reserved.
+
+OWNERSHIP
+---------
+This software and all associated code, assets, and materials are the sole and
+exclusive property of TechRealm and Haroon Ajmal.
+
+RESTRICTIONS
+------------
+No reuse, reproduction, distribution, modification, or use of this software or
+any part thereof is permitted without prior written permission from the
+copyright holders.
+
+REUSE & PERMISSIONS
+-------------------
+For permission to reuse, license, or otherwise use this work, please contact:
+
+  Email: ajmalharoon65@gmail.com
+  Email: info@techrealm.online
+
+Unauthorized use may result in legal action.
