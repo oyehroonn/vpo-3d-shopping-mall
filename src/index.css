@@ -122,6 +122,46 @@ html {
 }
 
 @layer components {
+  .cooking-notice {
+    @apply relative inline-grid font-display font-semibold;
+    color: hsl(38 12% 65%);
+    line-height: 1.5;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+
+  .cooking-notice > span {
+    grid-area: 1 / 1;
+  }
+
+  .cooking-notice__fill {
+    color: hsl(39 55% 82%);
+    clip-path: inset(0 100% 0 0);
+    animation: cooking-fill 5.5s linear infinite;
+  }
+
+  @keyframes cooking-fill {
+    0%, 8% {
+      clip-path: inset(0 100% 0 0);
+      opacity: 1;
+    }
+    68%, 84% {
+      clip-path: inset(0 0 0 0);
+      opacity: 1;
+    }
+    96%, 100% {
+      clip-path: inset(0 0 0 0);
+      opacity: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cooking-notice__fill {
+      animation: none;
+      clip-path: none;
+    }
+  }
+
   .editorial-section {
     @apply relative overflow-hidden;
   }

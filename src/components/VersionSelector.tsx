@@ -1,13 +1,15 @@
+import CookingNotice from "./CookingNotice";
+
 interface VersionSelectorProps {
   onSelect: (version: 'premium' | 'lite') => void;
 }
 
 const VersionSelector = ({ onSelect }: VersionSelectorProps) => {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background">
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-background py-8">
       <div className="grain-overlay" />
       
-      <div className="relative z-10 flex flex-col items-center gap-12 px-6 text-center">
+      <div className="relative z-10 my-auto flex flex-col items-center gap-8 px-6 text-center md:gap-12">
         {/* Logo/Title */}
         <div className="space-y-2">
           <h1 className="font-display text-4xl tracking-[0.3em] text-foreground">
@@ -16,6 +18,7 @@ const VersionSelector = ({ onSelect }: VersionSelectorProps) => {
           <p className="text-sm tracking-widest text-muted-foreground">
             SELECT YOUR EXPERIENCE
           </p>
+          <CookingNotice className="!mt-6 text-lg md:text-xl" />
         </div>
 
         {/* Options */}
