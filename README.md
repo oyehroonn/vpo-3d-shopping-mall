@@ -1,113 +1,120 @@
-# VPO — Virtual Private Outlet
+# VPO — Virtual Premium Outlets
 
-VPO is a concept web experience for a virtual luxury fashion destination. Think of it as a digital flagship store — part editorial, part showroom, part members-only club — built entirely in the browser.
+### Your friends. Your favourite stores. Considerably less airfare.
 
-The site presents high-end fashion brands (Celine, Valentino, Prada, Rick Owens, Hermès, Chanel, etc.) through a cinematic scroll-driven interface with 3D elements, frame-sequence animations, and glassmorphic UI treatments.
+What if you went shopping today?
 
----
+With your friend in New York. Your sister in Paris. That one friend in Dubai who calls everything “an investment piece.”
 
-## What's inside
+What if you could walk into a store together, explore its collections, try something on, and ask, “Be honest. Does this work?”
 
-**Landing & Hero**
-Scroll-triggered frame sequence that zooms the user into the environment, powered by GSAP ScrollTrigger and canvas-based image sequences.
+All without leaving your couch.
 
-**Manifesto**
-Full-bleed typographic section laying out VPO's vision — "Fashion is not just seen. It is entered."
+**That’s the world we’re building with VPO.**
 
-**Spaces**
-Interactive map-style section with brand waypoints (Chanel, Hermès) plotted on a spatial grid. Hover to preview each brand's virtual space.
+![A shopping street inside Virtual Premium Outlets](docs/images/vpo-shopping-street.png)
 
-**Current Selection**
-Curated brand list with large hover-reveal imagery. Brands include Celine, Valentino, Prada, and Rick Owens with location tags.
+*Imagine meeting your friends here. The commute is opening your browser.*
 
-**The Runway**
-Live broadcast schedule UI for virtual fashion shows. Features a lobby system where users can invite friends, pick brands, and join private viewing rooms together.
+## Somewhere along the way, online shopping lost the shopping.
 
-**Districts**
-Overview of themed brand neighborhoods (Comme des Garçons, Issey Miyake, Yohji Yamamoto) with architectural grid overlays.
+The wandering. The discovery. The friend who finds something you would never have picked yourself.
 
-**Access / Membership**
-Tiered membership model (Atelier tier at $299/season) with perks like global inventory storage, cross-district teleportation, and private lobby hosting.
+We got filters, grids, and 47 open tabs.
 
-**Journal**
-Editorial feed — articles on digital tactility, procedural generation, and brand collaborations.
+Convenient? Absolutely. A day out? Hardly.
 
-**Gallery / Editorial**
-Separate page with a warm-toned editorial layout, 3D model viewers (GLB/GLTF via React Three Fiber), and an experience container for immersive product exploration.
+VPO brings the experience of going shopping into a shared 3D world: real stores, their products, and people exploring them together.
 
-**Waitlist & Footer**
-Email capture for early access, copyright, and social links.
+Walk through the space. See what catches your eye. Take a detour. Find something you weren’t looking for.
 
----
+**The internet made shopping accessible. We want to make it somewhere you actually want to go.**
 
-## Design notes
+## Same couch. Different city.
 
-- Dark-first palette (`#050505` / `#080808` backgrounds) with stone and off-white accents
-- Glassmorphic navigation bar — transparent by default, `backdrop-blur-md` on hover with a 500ms transition
-- Scroll-reveal animations on almost every section via a reusable `ScrollReveal` component
-- Grain overlay textures for editorial feel
-- Grid-pattern backgrounds on light sections
-- Serif + sans-serif type pairing, heavy use of tracking and uppercase micro-labels
+Your next shopping trip could start across town or across the world.
 
----
+Step inside a store’s own 3D environment. Explore its layout, browse its collections, and get a sense of the place behind the products.
 
-## Tech stack
+The entrance. The displays. The corner you almost walked past.
 
-| Layer | Tool |
-|-------|------|
-| Framework | React 18 + TypeScript |
-| Build | Vite 5 |
-| Styling | Tailwind CSS 3.4 + tailwindcss-animate |
-| Components | shadcn/ui (Radix primitives) |
-| 3D | Three.js + React Three Fiber + Drei |
-| Animation | GSAP (ScrollTrigger) |
-| Routing | React Router v6 |
-| Icons | Lucide React |
+A store has a personality. It deserves more than a thumbnail.
 
----
+## Bring your friends. Especially the opinionated ones.
 
-## Running locally
+Send an invitation. Meet inside. Shop together.
 
-```sh
-npm install
-npm run dev
-```
+Catch up with a friend overseas while browsing the same collection. Show someone what you found. Help them choose. Accept absolutely no responsibility when they buy both.
 
-Requires Node.js 18+.
+VPO is being designed for the people you already love shopping with—and the distance that currently gets in the way.
 
----
+**Different time zones. Same shopping trip.**
 
-## Project structure (key paths)
+## A shopping street should have people in it.
 
-```
-src/
-├── pages/
-│   ├── Index.tsx              # Main landing page
-│   ├── GalleryEditorial.tsx   # Editorial / 3D gallery
-│   └── ...
-├── components/
-│   ├── vpo/                   # All VPO-specific sections
-│   │   ├── Navigation.tsx
-│   │   ├── ManifestoSection.tsx
-│   │   ├── SpacesSection.tsx
-│   │   ├── CurrentSelectionSection.tsx
-│   │   ├── RunwaySection.tsx
-│   │   ├── DistrictsSection.tsx
-│   │   ├── AccessSection.tsx
-│   │   ├── JournalSection.tsx
-│   │   ├── LobbyModal.tsx
-│   │   ├── WaitlistFooter.tsx
-│   │   └── ...
-│   ├── gallery/               # 3D viewers & editorial components
-│   ├── FrameSequence.tsx      # Canvas frame-sequence (hero)
-│   ├── FrameSequenceScene2.tsx
-│   ├── ScrollReveal.tsx       # Reusable scroll-triggered reveal
-│   └── ui/                    # shadcn/ui primitives
-└── index.css                  # Global styles, grain overlays, editorial captions
-```
+See other shoppers exploring the world alongside you.
 
----
+Friends arriving. People browsing. Characters passing through the same spaces.
 
-## Status
+That little sense that somewhere is alive.
 
-v0.9 Beta — currently waitlist-only. Wallet connect and full membership flows are placeholder UI.
+Come for a quick look, make an evening of it with friends, or wander on your own. There’s room for all three.
+
+## Dress yourself. Then dress yourself again.
+
+Create and customise your character, then take your style into the world.
+
+Explore collections, virtually try on pieces, and put together a look before adding your favourites to your cart.
+
+Get a second opinion from a friend. Politely ignore it.
+
+When you’re ready, head to the checkout counter and complete your purchase.
+
+**Browse, try on, add to cart, check out—all part of the same visit.**
+
+## Have a store? You already have the setting.
+
+You’ve spent time making your store feel like yours.
+
+Let’s bring that online.
+
+Our vision for retailers starts with something familiar: **shoot a video of your store.**
+
+That footage becomes the starting point for bringing your space into VPO. Add your product inventory, and give shoppers a place they can explore from anywhere.
+
+New product?
+
+**Take a photo. Add it to your inventory. Give it a place in your virtual store.**
+
+The ambition is to make keeping your virtual shop current feel like running your shop—not taking on a second career in 3D design.
+
+Your space. Your collections. A much bigger neighbourhood.
+
+## The experience we’re building
+
+- **Real stores in 3D** — Explore spaces with their own layout, atmosphere, and identity.
+- **Shopping with friends** — Invite people from around the world to join your visit.
+- **Live public shoppers** — Share the environment with others browsing in real time.
+- **Customisable characters** — Show up with a look of your own.
+- **Virtual try-on** — Explore how pieces come together before making a choice.
+- **A complete shopping journey** — Move from discovery to cart to checkout counters.
+- **Video-based store onboarding** — Start bringing a physical store online by filming it.
+- **Photo-based product updates** — Keep collections fresh as new inventory arrives.
+
+## We’re opening a new kind of shopping destination.
+
+One where your local store can welcome someone from another continent.
+
+Where seeing a friend doesn’t require coordinating flights.
+
+Where “let’s go shopping” can mean an actual shared experience again.
+
+VPO is currently in development. The early experience is a first look at that ambition; the features above describe the product we’re building toward.
+
+There’s plenty still cooking.
+
+**Bring your store. Bring your friends. Bring questionable financial restraint.**
+
+### VPO — Virtual Premium Outlets
+
+*See you inside.*
