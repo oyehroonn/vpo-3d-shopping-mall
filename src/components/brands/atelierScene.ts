@@ -204,9 +204,15 @@ export function createAtelier(host: HTMLElement, state: StudioState, onReady: (p
     const raised = options.sequence ? smooth((t - 5.3) / 1.2) * (1 - placement) : stage === 0 ? 0 : 1 - placement;
     const rotation = stage === 1 ? (t - 6) * .22 : stage === 2 ? (t - 13) * .82 + 1.54 : 7.28 * (1 - placement);
     bag.position.set(stage === 0 ? 0 : -.2 * raised, 1.25 + raised * .5, .25 + raised * .3);
+    // In the scroll variant, stage the incoming piece beside its destination
+    // until the simulated Replace click, so the two silhouettes stay distinct.
+    const handoff = options.sequence ? smooth((t - 19.3) / .7) * (1 - placement) : 0;
+    bag.position.x -= handoff * 1.75;
     bag.rotation.y = stage === 0 ? -.22 + state.rotation : rotation - .22 + state.rotation;
     bag.visible = stage !== 1; bag.scale.setScalar(1);
-    oldBag.visible = stage === 3 && placement < .85; oldBag.scale.setScalar(1 - placement); oldBag.position.x = placement * -1.4;
+    oldBag.visible = (options.sequence ? t >= 19.3 : stage === 3) && placement < .85;
+    oldBag.scale.setScalar((options.sequence ? smooth((t - 19.3) / .7) : 1) * (1 - placement));
+    oldBag.position.x = placement * (options.sequence ? 1.4 : -1.4);
     if (stage === 2) {
       const materialReveal = smooth((t - 13) / 3); bag.scale.setScalar(.97 + materialReveal * .03);
       bag.traverse(obj => { if (obj instanceof THREE.Mesh && obj.material instanceof THREE.MeshStandardMaterial) { obj.material.clippingPlanes = materialReveal < 1 ? [revealPlane] : []; } });

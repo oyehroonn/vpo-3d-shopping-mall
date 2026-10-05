@@ -71,7 +71,7 @@ export function createSequencePlayer(
     const center = Math.floor(wanted), direction = wanted >= previous ? 1 : -1;
     const candidates = [center, clamp(center + 1)];
     // Close frames first, then a short directional buffer. No full-sequence decode.
-    for (let i = 1; i <= 6; i++) candidates.push(clamp(center + i * direction), clamp(center - i * direction));
+    for (let i = 1; i <= 3; i++) candidates.push(clamp(center + i * direction), clamp(center - i * direction));
     candidates.push(...anchors);
     queue = [...new Set(candidates)].filter(i => !images.has(i) && !pending.has(i) && !failed.has(i));
     pump(); schedulePaint();

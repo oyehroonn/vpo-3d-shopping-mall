@@ -1,13 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { ArrowDown, ArrowRight, Box, Camera, Check, ChevronDown, MousePointer2, RotateCcw, ScanLine } from 'lucide-react';
+import { ArrowRight, Box, Camera, Check, ChevronDown, MousePointer2, RotateCcw, ScanLine } from 'lucide-react';
 import { createSequencePlayer } from './sequencePlayer';
 import './scroll-study.css';
 
 gsap.registerPlugin(ScrollTrigger);
 const FRAME_COUNT = 673;
 const FRAME_RATE = 24;
+const chapterPreviews = [1, 11, 17, 23.5, 27.5];
 const chapters = [
   { label: 'Capture', start: 0, end: 6, title: <>One photograph.<br /><em>Infinite possibility.</em></>, copy: 'Take a photo of your product. Bring the pieces you already love into a world that is unmistakably yours.', note: 'Your physical collection. A new beginning.', icon: Camera },
   { label: 'Reconstruct', start: 6, end: 13, title: <>A new dimension.<br /><em>Built from detail.</em></>, copy: 'Our AI spatial models reconstruct and process a high-quality 3D mesh of your object, bringing its shape into your virtual store.', note: 'From a photograph to a dimensional mesh.', icon: ScanLine },
@@ -74,7 +75,7 @@ export default function BrandScrollStudy() {
     retry.current = () => { setFailed(false); player.retry(); };
     const paint = () => { currentTime = playhead.frame / FRAME_RATE; player.seek(playhead.frame); };
     const setup = () => {
-      timeline?.kill();
+      timeline?.scrollTrigger?.kill(); timeline?.kill(); timeline = undefined;
       const prefersStill = motion.matches; setReduced(prefersStill);
       root.current?.classList.toggle('prefers-still', prefersStill);
       triggerElement.classList.toggle('prefers-still', prefersStill);
@@ -117,7 +118,7 @@ export default function BrandScrollStudy() {
 
   const price = time < 21.6 ? '—' : time < 21.95 ? '3' : time < 22.3 ? '39' : '399';
   const replacing = time >= 24.3, published = time >= 26.5;
-  return <section className={`brand-scroll-study ${embedded ? 'is-embedded' : ''}`} ref={root} aria-label="Experimental scroll-driven Atelier film">
+  return <><section className={`brand-scroll-study ${embedded ? 'is-embedded' : ''}`} ref={root} aria-label="Experimental scroll-driven Atelier film">
     <div className="scroll-study-stage" ref={stage}>
       <div className="scroll-study-top"><span>VPO <i>Atelier</i></span><span>Scroll study <b>01</b><small>Concept preview</small></span></div>
       <div className="scroll-study-visual">
@@ -142,10 +143,9 @@ export default function BrandScrollStudy() {
         <div className="scroll-copy-panels">{chapters.map((chapter, i) => <article key={chapter.label} ref={el => { titlePanels.current[i] = el; }} aria-hidden={i !== active} style={{opacity:i === 0 ? 1 : 0}}><span className="scroll-chapter-number">0{i + 1} / {chapter.label}</span><h2>{chapter.title}</h2><p>{chapter.copy}</p><span className="scroll-chapter-note"><chapter.icon size={13}/>{chapter.note}</span></article>)}</div>
         <div className="scroll-study-direction"><span className="scroll-mouse"><i/></span><span>{reduced ? 'Choose a chapter below' : 'Scroll to bring it to life'}<small>{reduced ? 'Reduced motion is enabled' : 'Move at your own pace. Scroll back to revisit.'}</small></span></div>
       </aside>
-      <footer className="scroll-study-bottom"><nav aria-label="Scroll film chapters">{chapters.map((chapter,i)=><button key={chapter.label} aria-label={`Go to ${chapter.label} chapter`} aria-current={active === i ? 'step' : undefined} onClick={()=>seekChapter.current(reduced ? chapter.end - .05 : chapter.start + .8)}><span>0{i+1}</span><span>{chapter.label}</span></button>)}</nav><div className="scroll-study-position"><span>{Math.round(time / 28 * 100)}%</span><button aria-label="Restart scroll study" onClick={()=>seekChapter.current(0)}><RotateCcw size={13}/></button></div><div className="scroll-study-progress"><span ref={progressBar}/></div></footer>
+      <footer className="scroll-study-bottom"><nav aria-label="Scroll film chapters">{chapters.map((chapter,i)=><button key={chapter.label} aria-label={`Go to ${chapter.label} chapter`} aria-current={active === i ? 'step' : undefined} onClick={()=>seekChapter.current(chapterPreviews[i])}><span>0{i+1}</span><span>{chapter.label}</span></button>)}</nav><div className="scroll-study-position"><span>{Math.round(time / 28 * 100)}%</span><button aria-label="Restart scroll study" onClick={()=>seekChapter.current(0)}><RotateCcw size={13}/></button></div><div className="scroll-study-progress"><span ref={progressBar}/></div></footer>
       <div className="scroll-study-status" role="status">{failed ? <button onClick={()=>retry.current()}>Some frames could not load. Retry ↻</button> : !loaded ? 'Preparing the scroll experience…' : waiting ? 'Bringing the next moment into focus…' : ''}</div>
       <a className="scroll-study-exit" href="#" onClick={event=>{event.preventDefault();if(embedded){const section=window.parent.document.getElementById('bp-scroll-test')!;window.parent.document.getElementById('business-page')!.scrollTo({top:section.offsetTop+section.offsetHeight,behavior:reduced?'auto':'smooth'});}else window.scrollTo({top:document.documentElement.scrollHeight,behavior:reduced?'auto':'smooth'});}}>{time>=27?'Explore at your own pace':'Skip scroll study'}<ChevronDown size={11}/></a>
     </div>
-    {!embedded&&<div className="scroll-study-end"><span>The Atelier / Scroll study 01</span><h3>A photograph.<br/><em>A world of possibility.</em></h3><a href="/vpo-business?preview=experience">Back to VPO for Brands <ArrowRight size={15}/></a></div>}
-  </section>;
+  </section>{!embedded&&<div className="scroll-study-end"><span>The Atelier / Scroll study 01</span><h3>A photograph.<br/><em>A world of possibility.</em></h3><a href="/vpo-business?preview=experience">Back to VPO for Brands <ArrowRight size={15}/></a></div>}</>;
 }

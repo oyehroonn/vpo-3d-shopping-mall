@@ -1578,6 +1578,25 @@
 #bp-features,#bp-tiers,#bp-process,#bp-outcomes,#bp-future,#bp-join { scroll-margin-top:56px; }
 @media(max-width:700px) { #bp-nav { padding:0 18px;gap:15px; } .bp-nav-links { gap:14px; } .bp-nav-link { font-size:7px;letter-spacing:.04em; } .bp-nav-link:nth-last-child(-n+2) { display:none; } .bp-nav-cta { padding:9px 12px;font-size:8px;letter-spacing:.06em; } .brand-intro-demo { padding:15px 20px;font-size:9px; } #brand-demo-shortcut { top:24px;right:18px;font-size:8px;padding:12px; } .bp-container { padding:0 22px; } .bp-section { padding:70px 0; } .bp-tier-grid { grid-template-columns:1fr; } }
 @media(prefers-reduced-motion:reduce) { #business-page { transition:none; } .bp-nav-brand,.dsm-strip-track { animation:none; } }
+
+/* The scroll experiment belongs to the page's native scroller, with no inner scroll trap. */
+.bp-scroll-intro { text-align:center;padding:105px 24px 90px;border-top:1px solid #d4bd9026;background:#080705;color:#e7ddcb; }
+.bp-scroll-intro>span,.bp-scroll-outro>span { font:8px var(--mono);letter-spacing:.22em;color:#b69f78; }
+.bp-scroll-intro h2 { font:400 clamp(38px,5vw,70px)/1.02 var(--serif);letter-spacing:-.025em;margin:24px 0; }
+.bp-scroll-intro h2 em,.bp-scroll-outro em { font-weight:300;color:#c3af8b; }
+.bp-scroll-intro p { font:12px/1.9 var(--sans);color:#a79b86;max-width:390px;margin:0 auto; }
+.bp-scroll-intro a { display:inline-flex;gap:28px;align-items:center;margin-top:28px;text-decoration:none;color:#dfc89e;font:9px var(--mono); }
+#bp-scroll-test { height:700svh;position:relative;scroll-margin-top:56px;background:#080705; }
+.bp-scroll-pin { position:sticky;top:56px;height:calc(100svh - 56px);overflow:hidden; }
+#brand-scroll-frame { display:block;width:100%;height:100%;border:0;background:#080705; }
+.bp-scroll-outro { padding:85px 24px 90px;text-align:center;background:#080705;color:#e3d6bf; }
+.bp-scroll-outro p { font:400 clamp(38px,5vw,62px)/1.05 var(--serif);margin:23px 0 28px; }
+.bp-scroll-outro button { cursor:pointer;background:none;border:1px solid #c9b18555;padding:14px 20px;color:#dbc39b;font:9px var(--mono); }
+.bp-scroll-outro small { display:block;color:#8b7d65;font:7px/1.8 var(--mono);margin-top:24px; }
+#bp-scroll-test.prefers-still { height:calc(100svh - 56px); }
+#bp-scroll-test.prefers-still .bp-scroll-pin { position:relative;top:0; }
+@media(max-width:700px) { #bp-scroll-test { height:620svh; } .bp-scroll-intro { padding:70px 24px 65px; } .bp-scroll-outro { padding:65px 24px; } .bp-scroll-intro p { font-size:11px; } }
+@media(prefers-reduced-motion:reduce) { #bp-scroll-test { height:calc(100svh - 56px); } .bp-scroll-pin { position:relative;top:0; } }
 </style>
 
 <!-- BUSINESS PAGE SHELL -->
@@ -1591,7 +1610,7 @@
             <button class="bp-nav-link" onclick="document.getElementById('bp-process').scrollIntoView({behavior:'smooth'})">Process</button>
             <button class="bp-nav-link" onclick="document.getElementById('bp-tiers').scrollIntoView({behavior:'smooth'})">Tiers</button>
             <button class="bp-nav-link" onclick="document.getElementById('bp-outcomes').scrollIntoView({behavior:'smooth'})">Outcomes</button>
-            <button class="bp-nav-link" onclick="document.getElementById('bp-future').scrollIntoView({behavior:'smooth'})">Coming Soon</button>
+            <button class="bp-nav-link" onclick="document.getElementById('bp-scroll-intro').scrollIntoView({behavior:'smooth'})">Scroll Study</button>
         </div>
         <button class="bp-nav-cta" onclick="document.getElementById('bp-join').scrollIntoView({behavior:'smooth'})">Apply Now</button>
     </nav>
@@ -1886,6 +1905,26 @@
         </div>
     </section>
 
+
+    <!-- Experimental second presentation of the Atelier film. The existing demo stays above. -->
+    <section class="bp-scroll-intro" id="bp-scroll-intro">
+        <span>VPO LAB / EXPERIENCE STUDY 01</span>
+        <h2>The same possibility.<br><em>A different way to feel it.</em></h2>
+        <p>An experiment in movement. Scroll through the journey from a photograph to a living collection.</p>
+        <a href="#bp-scroll-test" onclick="event.preventDefault();document.getElementById('bp-scroll-test').scrollIntoView({behavior:'smooth'})">Enter the scroll experience <span>↓</span></a>
+    </section>
+    <section id="bp-scroll-test" aria-label="Experimental scroll-driven product demo">
+        <div class="bp-scroll-pin">
+            <iframe id="brand-scroll-frame" src="/brand-scroll-study" loading="lazy" title="VPO Atelier scroll experience" scrolling="no"></iframe>
+        </div>
+    </section>
+    <footer class="bp-scroll-outro">
+        <span>THE ATELIER / SCROLL STUDY 01</span>
+        <p>A photograph.<br><em>A world of possibility.</em></p>
+        <button onclick="document.getElementById('bp-features').scrollIntoView({behavior:'smooth'})">Compare with the original film ↗</button>
+        <small>Experimental concept preview · Original 28-second demo preserved above</small>
+    </footer>
+
 </div><!-- #business-page -->
 
 <!-- ═══ BUSINESS PAGE INTERACTION JS ════════════════════════════════════ -->
@@ -2050,7 +2089,7 @@
     var preview = new URLSearchParams(window.location.search).get('preview');
     if (preview) {
         enterBusiness();
-        var section = preview === 'tiers' ? 'bp-tiers' : 'bp-features';
+        var section = preview === 'scroll' ? 'bp-scroll-test' : preview === 'tiers' ? 'bp-tiers' : 'bp-features';
         requestAnimationFrame(function() { document.getElementById(section).scrollIntoView(); });
     }
 
