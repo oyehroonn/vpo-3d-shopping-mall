@@ -6,3 +6,9 @@
 @media(max-width:700px) and (max-height:760px){.scroll-study-copy{bottom:118px}.scroll-copy-panels{height:160px}.scroll-copy-panels h2{font-size:32px}.scroll-copy-panels p{font-size:9px;margin-top:12px}.scroll-study-eyebrow{margin-bottom:12px}.scroll-study-direction{margin-top:12px}.scroll-study-visual{height:40%}.scroll-study-publish{top:0;padding:9px}.scroll-publish-title{margin-bottom:6px;padding-bottom:7px}.scroll-price-input{margin-top:8px}.scroll-publish-preview{display:none}.scroll-study-top{top:14px}.scroll-study-bottom{bottom:44px}}
 @media(min-width:701px) and (max-height:700px){.scroll-study-copy{top:21%}.scroll-study-eyebrow{margin-bottom:20px}.scroll-copy-panels{height:255px}.scroll-copy-panels h2{font-size:42px}.scroll-copy-panels p{font-size:10px;margin-top:18px}.scroll-chapter-note{margin-top:17px;font-size:7px}.scroll-study-direction{margin-top:17px}.scroll-study-publish{top:17%}}
 @media(prefers-reduced-motion:reduce){.brand-scroll-study,.brand-scroll-study.is-embedded{height:100svh}.scroll-study-stage{position:relative}.brand-scroll-study *{animation:none!important;transition:none!important}.scroll-copy-panels article{transform:none!important}}
+
+/* Display the delivered quality, with an explicit 4K override on every device. */
+.scroll-study-quality label{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+.scroll-study-quality select{appearance:auto;color:#e5d3b0;background:#17150fbf;border:1px solid #c8ad7955;border-radius:0;font:8px 'IBM Plex Mono',monospace;padding:8px 9px;cursor:pointer;max-width:140px;outline-offset:4px}
+.scroll-study-quality select option{background:#17150f;color:#e5d3b0}
+@media(max-width:700px){.scroll-study-quality select{font-size:7px;padding:7px;max-width:116px}}

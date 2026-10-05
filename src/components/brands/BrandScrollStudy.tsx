@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ArrowRight, Box, Camera, Check, ChevronDown, MousePointer2, RotateCcw, ScanLine } from 'lucide-react';
-import { createSequencePlayer } from './sequencePlayer';
+import { createSequencePlayer, type SequenceQuality, type SequenceVariant } from './sequencePlayer';
 import './scroll-study.css';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -25,18 +25,21 @@ export default function BrandScrollStudy() {
   const progressBar = useRef<HTMLSpanElement>(null);
   const seekChapter = useRef<(time: number) => void>(() => {});
   const retry = useRef(() => {});
+  const changeQuality = useRef<(quality: SequenceQuality) => void>(() => {});
+  const [quality, setQuality] = useState<SequenceQuality>('auto');
+  const [variant, setVariant] = useState<SequenceVariant>('4k');
   const [time, setTime] = useState(0), [active, setActive] = useState(0);
   const [loaded, setLoaded] = useState(false), [failed, setFailed] = useState(false), [waiting, setWaiting] = useState(false);
   const [reduced, setReduced] = useState(false);
-  const [embedded] = useState(() => { try { return !!window.parent.document.getElementById('bp-scroll-test') && window.parent !== window; } catch { return false; } });
+  const [embedded] = useState(() => { try { return !!window.parent.document.getElementById('bp-scroll-experience') && window.parent !== window; } catch { return false; } });
 
   useEffect(() => {
     if (!root.current || !stage.current || !canvas.current) return;
     const scrollRoot = embedded ? window.parent.document.getElementById('business-page')! : null;
-    const triggerElement = embedded ? window.parent.document.getElementById('bp-scroll-test')! : root.current;
+    const triggerElement = embedded ? window.parent.document.getElementById('bp-scroll-experience')! : root.current;
     const parentWindow = embedded ? window.parent : window;
     const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
-    let disposed = false, lastUI = 0, currentTime = 0, waitingTimer: ReturnType<typeof setTimeout> | undefined;
+    let disposed = false, lastUI = 0, waitingTimer: ReturnType<typeof setTimeout> | undefined;
     let timeline: gsap.core.Timeline | undefined;
     const playhead = { frame: 0 };
     const drawLabels = (t: number) => {
@@ -64,28 +67,29 @@ export default function BrandScrollStudy() {
       onPaint: (frame, isWaiting) => {
         if (disposed) return;
         setLoaded(true);
-        clearTimeout(waitingTimer);
-        if (isWaiting) waitingTimer = setTimeout(() => { if (!disposed) setWaiting(true); }, 220);
-        else setWaiting(false);
+        if (isWaiting && !waitingTimer) waitingTimer = setTimeout(() => { if (!disposed) setWaiting(true); }, 220);
+        else if (!isWaiting) { clearTimeout(waitingTimer); waitingTimer = undefined; setWaiting(false); }
         // Side copy and UI always follow the frame actually on screen.
-        drawLabels(isWaiting ? frame / FRAME_RATE : currentTime);
+        drawLabels(frame / FRAME_RATE);
       },
       onFailure: () => { if (!disposed) setFailed(true); },
+      onVariant: (next) => { if (!disposed) { setVariant(next); setFailed(false); } },
     });
     retry.current = () => { setFailed(false); player.retry(); };
-    const paint = () => { currentTime = playhead.frame / FRAME_RATE; player.seek(playhead.frame); };
+    changeQuality.current = (next) => { setQuality(next); player.setQuality(next); };
+    const paint = () => player.seek(playhead.frame);
     const setup = () => {
       timeline?.scrollTrigger?.kill(); timeline?.kill(); timeline = undefined;
       const prefersStill = motion.matches; setReduced(prefersStill);
       root.current?.classList.toggle('prefers-still', prefersStill);
       triggerElement.classList.toggle('prefers-still', prefersStill);
       if (prefersStill) {
-        seekChapter.current = (t) => { currentTime = t; playhead.frame = t * FRAME_RATE; paint(); };
+        seekChapter.current = (t) => { playhead.frame = t * FRAME_RATE; paint(); };
         paint(); return;
       }
       timeline = gsap.timeline({
         scrollTrigger: {
-          id: 'vpo-atelier-scroll-study', trigger: triggerElement, scroller: scrollRoot || undefined,
+          id: 'vpo-atelier-scroll-experience', trigger: triggerElement, scroller: scrollRoot || undefined,
           start: embedded ? 'top top+=56' : 'top top',
           end: () => `+=${Math.max(1, triggerElement.offsetHeight - stage.current!.offsetHeight)}`,
           scrub: window.matchMedia('(max-width: 700px)').matches ? .5 : .8,
@@ -107,25 +111,30 @@ export default function BrandScrollStudy() {
     resizeObserver.observe(stage.current);
     if (embedded) { const previous = window.parent.document.getElementById('bp-features'); if (previous) resizeObserver.observe(previous); }
     motion.addEventListener('change', setup); parentWindow.addEventListener('resize', refresh);
+    let nearViewport = true;
+    const updateActivity = () => player.setActive(nearViewport && !document.hidden);
+    const visibilityObserver = new IntersectionObserver(([entry]) => { nearViewport = entry.isIntersecting; updateActivity(); }, {root:scrollRoot,rootMargin:'500px 0px'});
+    visibilityObserver.observe(triggerElement);
+    document.addEventListener('visibilitychange', updateActivity);
     setup(); drawLabels(0);
     window.parent.postMessage({type:'vpo:scroll-study-ready'}, window.location.origin);
     return () => {
       disposed = true; clearTimeout(waitingTimer); timeline?.scrollTrigger?.kill(); timeline?.kill();
-      player.destroy(); resizeObserver.disconnect(); motion.removeEventListener('change', setup); parentWindow.removeEventListener('resize', refresh);
-      triggerElement.classList.remove('prefers-still'); seekChapter.current = () => {};
+      player.destroy(); visibilityObserver.disconnect(); document.removeEventListener('visibilitychange', updateActivity); resizeObserver.disconnect(); motion.removeEventListener('change', setup); parentWindow.removeEventListener('resize', refresh);
+      triggerElement.classList.remove('prefers-still'); seekChapter.current = () => {}; changeQuality.current = () => {};
     };
   }, [embedded]);
 
   const price = time < 21.6 ? '—' : time < 21.95 ? '3' : time < 22.3 ? '39' : '399';
   const replacing = time >= 24.3, published = time >= 26.5;
-  return <><section className={`brand-scroll-study ${embedded ? 'is-embedded' : ''}`} ref={root} aria-label="Experimental scroll-driven Atelier film">
+  return <><section className={`brand-scroll-study ${embedded ? 'is-embedded' : ''}`} ref={root} aria-label="Scroll-driven Atelier film">
     <div className="scroll-study-stage" ref={stage}>
-      <div className="scroll-study-top"><span>VPO <i>Atelier</i></span><span>Scroll study <b>01</b><small>Concept preview</small></span></div>
+      <div className="scroll-study-top"><span>VPO <i>Atelier</i></span><span className="scroll-study-quality"><label htmlFor="atelier-quality">Film quality</label><select id="atelier-quality" aria-label="Film quality" value={quality} onChange={event=>changeQuality.current(event.target.value as SequenceQuality)}><option value="auto">Auto · {variant === '4k' ? '4K' : 'HD'}</option><option value="4k">4K Ultra HD</option><option value="lite">Data saver</option></select><small>Concept preview</small></span></div>
       <div className="scroll-study-visual">
-        <img className={`scroll-study-poster ${loaded ? 'is-loaded' : ''}`} src="/brands/scroll-sequence/desktop/frame-0000.webp" alt="The Atelier 01 bag on an illuminated luxury-store shelf" />
-        <canvas ref={canvas} aria-label="Scroll-controlled frames showing product capture, mesh reconstruction, materials, $399 pricing, and shelf replacement" />
+        <img className={`scroll-study-poster ${loaded ? 'is-loaded' : ''}`} src="/brands/scroll-sequence/desktop/frame-0000.webp?v=2" alt="The Atelier 01 bag on an illuminated luxury-store shelf" />
+        <canvas ref={canvas} style={{opacity:loaded ? 1 : 0}} aria-label="Scroll-controlled frames showing product capture, mesh reconstruction, materials, $399 pricing, and shelf replacement" />
         <div className="scroll-study-vignette" />
-        <div className="scroll-study-phone" aria-hidden="true"><span className="scroll-phone-lens"/><img src="/brands/scroll-sequence/mobile/frame-0000.webp" alt=""/><div className="scroll-phone-focus"/><span className="scroll-phone-shutter"><Camera size={15}/></span><small>{time < 3 ? 'Take a photograph' : 'Photo added to studio ✓'}</small></div>
+        <div className="scroll-study-phone" aria-hidden="true"><span className="scroll-phone-lens"/><img src="/brands/scroll-sequence/mobile/frame-0000.webp?v=2" alt=""/><div className="scroll-phone-focus"/><span className="scroll-phone-shutter"><Camera size={15}/></span><small>{time < 3 ? 'Take a photograph' : 'Photo added to studio ✓'}</small></div>
         <div className="scroll-study-scan" aria-hidden="true"><span><i/> Spatial reconstruction</span><strong>{Math.round(clamp((time - 6) / 7) * 100)}<small>%</small></strong><p>Point cloud → 3D mesh</p></div>
         <div className="scroll-study-publish" aria-hidden={time < 19.8}>
           <div className="scroll-publish-title"><Box size={13}/><span>Collection studio</span><small>01</small></div>
@@ -143,9 +152,9 @@ export default function BrandScrollStudy() {
         <div className="scroll-copy-panels">{chapters.map((chapter, i) => <article key={chapter.label} ref={el => { titlePanels.current[i] = el; }} aria-hidden={i !== active} style={{opacity:i === 0 ? 1 : 0}}><span className="scroll-chapter-number">0{i + 1} / {chapter.label}</span><h2>{chapter.title}</h2><p>{chapter.copy}</p><span className="scroll-chapter-note"><chapter.icon size={13}/>{chapter.note}</span></article>)}</div>
         <div className="scroll-study-direction"><span className="scroll-mouse"><i/></span><span>{reduced ? 'Choose a chapter below' : 'Scroll to bring it to life'}<small>{reduced ? 'Reduced motion is enabled' : 'Move at your own pace. Scroll back to revisit.'}</small></span></div>
       </aside>
-      <footer className="scroll-study-bottom"><nav aria-label="Scroll film chapters">{chapters.map((chapter,i)=><button key={chapter.label} aria-label={`Go to ${chapter.label} chapter`} aria-current={active === i ? 'step' : undefined} onClick={()=>seekChapter.current(chapterPreviews[i])}><span>0{i+1}</span><span>{chapter.label}</span></button>)}</nav><div className="scroll-study-position"><span>{Math.round(time / 28 * 100)}%</span><button aria-label="Restart scroll study" onClick={()=>seekChapter.current(0)}><RotateCcw size={13}/></button></div><div className="scroll-study-progress"><span ref={progressBar}/></div></footer>
+      <footer className="scroll-study-bottom"><nav aria-label="Scroll film chapters">{chapters.map((chapter,i)=><button key={chapter.label} aria-label={`Go to ${chapter.label} chapter`} aria-current={active === i ? 'step' : undefined} onClick={()=>seekChapter.current(chapterPreviews[i])}><span>0{i+1}</span><span>{chapter.label}</span></button>)}</nav><div className="scroll-study-position"><span>{Math.round(time / 28 * 100)}%</span><button aria-label="Restart Atelier experience" onClick={()=>seekChapter.current(0)}><RotateCcw size={13}/></button></div><div className="scroll-study-progress"><span ref={progressBar}/></div></footer>
       <div className="scroll-study-status" role="status">{failed ? <button onClick={()=>retry.current()}>Some frames could not load. Retry ↻</button> : !loaded ? 'Preparing the scroll experience…' : waiting ? 'Bringing the next moment into focus…' : ''}</div>
-      <a className="scroll-study-exit" href="#" onClick={event=>{event.preventDefault();if(embedded){const section=window.parent.document.getElementById('bp-scroll-test')!;window.parent.document.getElementById('business-page')!.scrollTo({top:section.offsetTop+section.offsetHeight,behavior:reduced?'auto':'smooth'});}else window.scrollTo({top:document.documentElement.scrollHeight,behavior:reduced?'auto':'smooth'});}}>{time>=27?'Explore at your own pace':'Skip scroll study'}<ChevronDown size={11}/></a>
+      <a className="scroll-study-exit" href="#" onClick={event=>{event.preventDefault();if(embedded){const section=window.parent.document.getElementById('bp-scroll-experience')!;window.parent.document.getElementById('business-page')!.scrollTo({top:section.offsetTop+section.offsetHeight,behavior:reduced?'auto':'smooth'});}else window.scrollTo({top:document.documentElement.scrollHeight,behavior:reduced?'auto':'smooth'});}}>{time>=27?'Discover more possibilities':'Skip to more possibilities'}<ChevronDown size={11}/></a>
     </div>
-  </section>{!embedded&&<div className="scroll-study-end"><span>The Atelier / Scroll study 01</span><h3>A photograph.<br/><em>A world of possibility.</em></h3><a href="/vpo-business?preview=experience">Back to VPO for Brands <ArrowRight size={15}/></a></div>}</>;
+  </section>{!embedded&&<div className="scroll-study-end"><span>The Atelier / The living catalogue</span><h3>A photograph.<br/><em>A world of possibility.</em></h3><a href="/vpo-business?preview=experience">Back to VPO for Brands <ArrowRight size={15}/></a></div>}</>;
 }
