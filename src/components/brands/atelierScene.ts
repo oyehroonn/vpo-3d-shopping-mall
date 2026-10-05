@@ -108,7 +108,9 @@ export function buildHandbag(grain: THREE.Texture, color = '#754021', details?: 
 }
 
 export type StudioState = { time: number; playing: boolean; visible: boolean; night: boolean; rotation: number; quality: 'auto' | '4k'; reducedMotion: boolean };
-export function createAtelier(host: HTMLElement, state: StudioState, onReady: (photo: string) => void, onError: () => void) {
+export type AtelierExportController = { canvas: HTMLCanvasElement; renderAt: (time: number) => void };
+type AtelierOptions = { sequence?: boolean; onExportController?: (controller: AtelierExportController) => void };
+export function createAtelier(host: HTMLElement, state: StudioState, onReady: (photo: string) => void, onError: () => void, options: AtelierOptions = {}) {
   let renderer: THREE.WebGLRenderer;
   try { renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, preserveDrawingBuffer: true, powerPreference: 'high-performance' }); } catch { onError(); return () => {}; }
   renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.06;
@@ -187,16 +189,19 @@ export function createAtelier(host: HTMLElement, state: StudioState, onReady: (p
   };
   const observer = new ResizeObserver(resize); observer.observe(host); resize();
   const cameraTarget = new THREE.Vector3(); const look = new THREE.Vector3();
-  const render = (now: number) => {
-    if (disposed) return; frame = requestAnimationFrame(render);
-    if ((!state.visible || document.hidden) && captured) return;
-    if (now - lastFrame < (state.reducedMotion ? 100 : 1000 / 40)) return; lastFrame = now;
+  const render = (now: number, exporting = false) => {
+    if (disposed) return;
+    if (!exporting) frame = requestAnimationFrame(render);
+    if (!exporting && (!state.visible || document.hidden) && captured) return;
+    if (!exporting && now - lastFrame < (state.reducedMotion ? 100 : 1000 / 40)) return; lastFrame = now;
     if (lastQuality !== state.quality) resize();
     const nextKey = `${state.time}/${state.night}/${state.rotation}/${state.quality}/${width}/${height}`;
     if (nextKey !== renderKey) { renderKey = nextKey; settlingFrames = 40; }
-    else if (captured && settlingFrames-- <= 0) return;
+    else if (!exporting && captured && settlingFrames-- <= 0) return;
     const t = state.time; const stage = t < 6 ? 0 : t < 13 ? 1 : t < 20 ? 2 : 3;
-    const placement = smooth((t - 21) / 4); const raised = stage === 0 ? 0 : 1 - placement;
+    // The separate scroll study holds the existing piece until the simulated Replace click.
+    const placement = options.sequence ? smooth((t - 24.3) / 2.2) : smooth((t - 21) / 4);
+    const raised = options.sequence ? smooth((t - 5.3) / 1.2) * (1 - placement) : stage === 0 ? 0 : 1 - placement;
     const rotation = stage === 1 ? (t - 6) * .22 : stage === 2 ? (t - 13) * .82 + 1.54 : 7.28 * (1 - placement);
     bag.position.set(stage === 0 ? 0 : -.2 * raised, 1.25 + raised * .5, .25 + raised * .3);
     bag.rotation.y = stage === 0 ? -.22 + state.rotation : rotation - .22 + state.rotation;
@@ -213,12 +218,21 @@ export function createAtelier(host: HTMLElement, state: StudioState, onReady: (p
     if (stage === 1) revealPlane.constant = scan.position.y;
     const distance = stage === 3 ? 1 + placement * .22 : 1;
     const mobile = width < 600; cameraTarget.set((stage === 1 ? 3.1 : 2.7) * distance, 2.65 + raised * .42, (mobile ? 9.7 : 6.4) * distance);
-    camera.position.lerp(cameraTarget, captured ? .06 : 1); look.set(mobile && stage === 3 ? .55 : -.10, 2.03 + raised * .30, 0); camera.lookAt(look);
+    if (options.sequence) cameraTarget.x = (2.7 + .4 * smooth((t - 6) / .8) * (1 - smooth((t - 13) / .8))) * distance;
+    camera.position.lerp(cameraTarget, exporting ? 1 : captured ? .06 : 1); look.set(mobile && stage === 3 ? .55 : -.10, 2.03 + raised * .30, 0); camera.lookAt(look);
     const scanning = stage === 1;
     travertine.color.lerp(scanning ? scanStone : naturalStone, .10);
     alcoveLights.forEach(light => { light.intensity = THREE.MathUtils.lerp(light.intensity, scanning ? .6 : 6, .1); });
     ambient.intensity = THREE.MathUtils.lerp(ambient.intensity, state.night || scanning ? .25 : .9, .05); key.intensity = THREE.MathUtils.lerp(key.intensity, state.night || scanning ? .4 : 2.2, .05);
     renderer.toneMappingExposure = THREE.MathUtils.lerp(renderer.toneMappingExposure, state.night ? .75 : 1.06, .05);
+    if (exporting) {
+      const scanBlend = smooth((t - 6) / .65) * (1 - smooth((t - 13) / .8));
+      travertine.color.copy(naturalStone).lerp(scanStone, scanBlend);
+      alcoveLights.forEach(light => { light.intensity = THREE.MathUtils.lerp(6, .6, scanBlend); });
+      ambient.intensity = THREE.MathUtils.lerp(.9, .25, scanBlend);
+      key.intensity = THREE.MathUtils.lerp(2.2, .4, scanBlend);
+      renderer.toneMappingExposure = 1.06;
+    }
     renderer.render(scene, camera);
     if (!captured && assetsRemaining === 0) {
       // A missing optional material map must not prevent the original model from loading.
@@ -230,6 +244,7 @@ export function createAtelier(host: HTMLElement, state: StudioState, onReady: (p
       captured = true; onReady(renderer.domElement.toDataURL('image/jpeg', .88));
     }
   }; frame = requestAnimationFrame(render);
+  options.onExportController?.({ canvas: renderer.domElement, renderAt: (time) => { state.time = time; render(performance.now(), true); } });
   const contextLost = (e: Event) => { e.preventDefault(); onError(); }; renderer.domElement.addEventListener('webglcontextlost', contextLost);
   return () => {
     disposed = true; cancelAnimationFrame(frame); observer.disconnect(); renderer.domElement.removeEventListener('webglcontextlost', contextLost);
