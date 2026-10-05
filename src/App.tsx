@@ -10,6 +10,9 @@ import Scene3Test from "./pages/Scene3Test";
 import GalleryEditorial from "./pages/GalleryEditorial";
 import Fashion3DTest from "./pages/Fashion3DTest";
 import VPOBusiness from "./pages/VPOBusiness";
+import { lazy, Suspense } from "react";
+
+const BrandExperience = lazy(() => import("./components/brands/BrandExperience"));
 
 const queryClient = new QueryClient();
 
@@ -26,6 +29,7 @@ const App = () => (
           <Route path="/gallery" element={<GalleryEditorial />} />
           <Route path="/fashion-3d-test" element={<Fashion3DTest />} />
           <Route path="/vpo-business" element={<VPOBusiness />} />
+          <Route path="/brand-experience" element={<Suspense fallback={<div style={{ minHeight: 600, background: '#080705', color: '#e9e2d5', padding: 40 }}>Preparing your brand experience…</div>}><BrandExperience /></Suspense>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

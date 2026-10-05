@@ -7,7 +7,7 @@ const Navigation = () => {
     { label: "Editorial", href: "/gallery", isRoute: true },
     { label: "Journal", href: "#journal", isRoute: false },
     { label: "Access", href: "#account", isRoute: false },
-    { label: "DSM For Businesses", href: "/vpo-business", isRoute: true },
+    { label: "VPO for Brands", href: "/vpo-business", isRoute: true },
   ];
 
   const handleSmoothScroll = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
@@ -54,6 +54,7 @@ const Navigation = () => {
 
         {/* Actions */}
         <div className="flex-1 flex justify-end items-center gap-6">
+          <Link to="/vpo-business" className="md:hidden text-[9px] uppercase tracking-widest whitespace-nowrap">VPO for Brands</Link>
           <span className="hidden lg:block text-[10px] text-stone-400 uppercase tracking-widest">
             v.0.9 Beta
           </span>
