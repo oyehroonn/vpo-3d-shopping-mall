@@ -89,6 +89,31 @@ Production performance still depends on hosting latency, cache headers, bandwidt
 and the device. Serve the versioned sequence assets from a CDN with durable cache
 headers when deploying; no external deployment or hosting changes were made here.
 
+## Verification (local Chrome, 2026-10-05)
+
+A fresh production-preview load at 1440×1000 with device pixel ratio 2 displayed
+the 4K sequence in **1.96 seconds** and requested **five images initially**
+(three nearby 4K frames and the two poster/phone images, about 1.5 MB combined).
+This timing includes the local business page and iframe startup.
+
+With a cold cache and Chrome network emulation at **8 Mbps / 80 ms latency**,
+the standalone sequence displayed a first frame in **2.97 seconds**. Auto
+switched to 1080p by **3.77 seconds**. Explicit 4K remained 4K under the same
+throttle. These measurements are local checks, not production benchmarks or
+promises for slower networks/devices.
+
+Instrumented frame decoding confirmed four retained 4K frames (126.6 MiB raw
+pixels), with a transient fifth during replacement, and one retained frame after
+leaving the section. Other application textures and browser/GPU memory are not
+included in this sequence-cache measurement.
+
+Also checked: forward/reverse native wheel scrolling, all five chapters, $399
+entry and completed shelf replacement, quality changes, 390 px mobile layout
+without horizontal overflow, explicit 4K on mobile, reduced-motion chapters,
+retry after an aborted frame request, and the original 28-second film restored
+through its URL override with 4K selected. No runtime errors were observed.
+Build, TypeScript and changed-file ESLint checks passed.
+
 ## Regenerate the frames
 
 See `public/brands/scroll-sequence/README.md` for the storyboard and exporter.
