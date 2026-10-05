@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ArrowDown, ArrowRight, Check, Camera, ScanLine, Box, Globe2, Pause, Play, RotateCcw, Maximize2, Minimize2, Moon, Sun, Users, Link2, ShoppingBag, RefreshCw, ChevronRight, VolumeX } from 'lucide-react';
+import { ArrowDown, ArrowRight, Check, Camera, ScanLine, Box, Pause, Play, RotateCcw, Maximize2, Minimize2, Moon, Sun, Users, Link2, ShoppingBag, RefreshCw, ChevronRight, VolumeX } from 'lucide-react';
 import { createAtelier, type StudioState } from './atelierScene';
 import Heatmap from './Heatmap';
 import './brands.css';
@@ -17,28 +17,26 @@ function ProductDemo() {
   const [time, setTime] = useState(0); const [playing, setPlaying] = useState(true); const [night, setNight] = useState(false);
   const [quality, setQuality] = useState(false); const [ready, setReady] = useState(false); const [photo, setPhoto] = useState('');
   const [failed, setFailed] = useState(false); const [fullscreen, setFullscreen] = useState(false); const [fullscreenError, setFullscreenError] = useState('');
-  const [inView, setInView] = useState(false);
+  const [activated, setActivated] = useState(false);
   const stage = time < 6 ? 0 : time < 13 ? 1 : time < 20 ? 2 : 3;
-  const selectStage = (index: number) => { const t = stages[index].start + .1; state.current.time = t; setTime(t); state.current.playing = false; setPlaying(false); };
+  const selectStage = (index: number) => { const motion = !state.current.reducedMotion; const t = motion ? stages[index].start + .1 : stages[index].end - .1; state.current.time = t; setTime(t); state.current.playing = motion; setPlaying(motion); };
   const replay = () => { state.current.time = 0; state.current.rotation = 0; state.current.playing = true; setTime(0); setPlaying(true); };
   const toggle = () => { if (state.current.time >= 28) { replay(); return; } state.current.playing = !state.current.playing; setPlaying(state.current.playing); };
   useEffect(() => {
     const media = matchMedia('(prefers-reduced-motion: reduce)');
     const apply = () => {state.current.reducedMotion = media.matches; if (media.matches) {state.current.playing = false; setPlaying(false);}};
     apply(); media.addEventListener('change', apply);
-    const observer = new IntersectionObserver(([entry]) => { state.current.visible = entry.isIntersecting; setInView(entry.isIntersecting); }, { threshold: .15 });
+    const observer = new IntersectionObserver(([entry]) => { state.current.visible = entry.isIntersecting; if (entry.isIntersecting) setActivated(true); }, { threshold: .15 });
     if (cinema.current) observer.observe(cinema.current);
     const fullChange = () => setFullscreen(document.fullscreenElement === cinema.current); document.addEventListener('fullscreenchange', fullChange);
     return () => { media.removeEventListener('change', apply); observer.disconnect(); document.removeEventListener('fullscreenchange', fullChange); };
   }, []);
   useEffect(() => {
-    if (!inView || ready || failed || !host.current) return;
+    if (!activated || !host.current) return;
     // Mount the renderer only when the experience enters the viewport.
     const cleanup = createAtelier(host.current, state.current, image => { setPhoto(image); setReady(true); }, () => setFailed(true));
     return cleanup;
-    // Keep the scene alive when ready changes; visibility is handled inside the renderer.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [!!host.current, inView && !ready && !failed]);
+  }, [activated]);
   useEffect(() => {
     if (!ready && !failed) return;
     let frame: number, last = performance.now(), lastUI = 0;
@@ -61,7 +59,7 @@ function ProductDemo() {
     <div className="story-heading"><div><span className="eyebrow">01 / The living catalogue</span><h2 id="product-story-title">A photograph.<br /><em>A whole new possibility.</em></h2></div><p>Your next collection is closer than you think.<br />Discover how a physical piece could become<br className="desktop-break" /> part of your digital flagship.</p></div>
     <div className={`cinema ${night ? 'is-night' : ''} stage-${stage}`} ref={cinema}>
       <div className="studio-canvas" ref={host} onPointerDown={e => {drag.current=e.clientX; e.currentTarget.setPointerCapture(e.pointerId);}} onPointerMove={e => {if(drag.current!==null){state.current.rotation+=(e.clientX-drag.current)*.009;drag.current=e.clientX;}}} onPointerUp={() => {drag.current=null;}} onPointerCancel={() => {drag.current=null;}} />
-      {(!ready || failed) && <div className="studio-fallback"><img src="/brands/private-salon.jpg" alt="A warm travertine and walnut boutique with leather goods on illuminated shelves" /><span>{failed ? 'Explore the concept storyboard using the steps below.' : 'Preparing the atelier…'}</span></div>}
+      {(!ready || failed) && <div className="studio-fallback"><img src="/brands/atelier-poster-4k.jpg" alt="The original Atelier 01 leather bag on its illuminated travertine display shelf" /><span>{failed ? 'Explore the concept storyboard using the steps below.' : 'Preparing the atelier…'}</span></div>}
       <div className="cinema-shade" />
       <div className="cinema-top"><span className="cinema-brand">VPO <i>Atelier</i></span><div><span className="demo-label">Concept film</span><button onClick={() => {state.current.night=!night;setNight(!night);}} aria-label={night?'Switch to day ambience':'Switch to evening ambience'} title="Change the atmosphere">{night?<Moon size={15}/>:<Sun size={15}/>}</button><button aria-pressed={quality} onClick={() => {state.current.quality=quality?'auto':'4k';setQuality(!quality);}} title="High-resolution rendering; performance depends on your device">{quality?'4K':'HD'}</button><button onClick={expand} aria-label={fullscreen?'Exit fullscreen':'Enter fullscreen'}>{fullscreen?<Minimize2 size={15}/>:<Maximize2 size={15}/>}</button></div></div>
       <div className={`capture-frame ${stage===0?'visible':''}`} aria-hidden="true"><span/><span/><span/><span/><div><Camera size={13}/> ATELIER / 001</div></div>

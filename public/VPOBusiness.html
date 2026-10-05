@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DSM FOR BUSINESSES | The Spatial Commerce Platform</title>
+    <title>VPO FOR BRANDS | The Spatial Commerce Platform</title>
 
     <!-- Fonts: Full VPO editorial stack -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -410,6 +410,7 @@
     </style>
 </head>
 <body class="antialiased">
+    <button id="brand-demo-shortcut" onclick="window.dispatchEvent(new CustomEvent('vpo:enter-business'));document.getElementById('bp-features').scrollIntoView({behavior:'smooth'});">Explore brand demos ↗</button>
 
     <!-- Film grain + vignette -->
     <div class="noise"></div>
@@ -418,22 +419,22 @@
     <!-- Ambient cursor glow (behind canvas, shows through transparency) -->
     <div id="cursor-glow" aria-hidden="true"></div>
 
-    <!-- DSM FOR BUSINESSES — horizontal moving title strip (behind canvas) -->
+    <!-- VPO FOR BRANDS — horizontal moving title strip (behind canvas) -->
     <div id="dsm-title-strip" aria-hidden="true">
         <div class="dsm-strip-track">
-            <span class="dsm-strip-item">DSM FOR BUSINESSES</span><span class="dsm-strip-sep">·</span>
-            <span class="dsm-strip-item">DSM FOR BUSINESSES</span><span class="dsm-strip-sep">·</span>
-            <span class="dsm-strip-item">DSM FOR BUSINESSES</span><span class="dsm-strip-sep">·</span>
-            <span class="dsm-strip-item">DSM FOR BUSINESSES</span><span class="dsm-strip-sep">·</span>
-            <span class="dsm-strip-item">DSM FOR BUSINESSES</span><span class="dsm-strip-sep">·</span>
-            <span class="dsm-strip-item">DSM FOR BUSINESSES</span><span class="dsm-strip-sep">·</span>
+            <span class="dsm-strip-item">VPO FOR BRANDS</span><span class="dsm-strip-sep">·</span>
+            <span class="dsm-strip-item">VPO FOR BRANDS</span><span class="dsm-strip-sep">·</span>
+            <span class="dsm-strip-item">VPO FOR BRANDS</span><span class="dsm-strip-sep">·</span>
+            <span class="dsm-strip-item">VPO FOR BRANDS</span><span class="dsm-strip-sep">·</span>
+            <span class="dsm-strip-item">VPO FOR BRANDS</span><span class="dsm-strip-sep">·</span>
+            <span class="dsm-strip-item">VPO FOR BRANDS</span><span class="dsm-strip-sep">·</span>
             <!-- Exact duplicate for seamless loop -->
-            <span class="dsm-strip-item">DSM FOR BUSINESSES</span><span class="dsm-strip-sep">·</span>
-            <span class="dsm-strip-item">DSM FOR BUSINESSES</span><span class="dsm-strip-sep">·</span>
-            <span class="dsm-strip-item">DSM FOR BUSINESSES</span><span class="dsm-strip-sep">·</span>
-            <span class="dsm-strip-item">DSM FOR BUSINESSES</span><span class="dsm-strip-sep">·</span>
-            <span class="dsm-strip-item">DSM FOR BUSINESSES</span><span class="dsm-strip-sep">·</span>
-            <span class="dsm-strip-item">DSM FOR BUSINESSES</span><span class="dsm-strip-sep">·</span>
+            <span class="dsm-strip-item">VPO FOR BRANDS</span><span class="dsm-strip-sep">·</span>
+            <span class="dsm-strip-item">VPO FOR BRANDS</span><span class="dsm-strip-sep">·</span>
+            <span class="dsm-strip-item">VPO FOR BRANDS</span><span class="dsm-strip-sep">·</span>
+            <span class="dsm-strip-item">VPO FOR BRANDS</span><span class="dsm-strip-sep">·</span>
+            <span class="dsm-strip-item">VPO FOR BRANDS</span><span class="dsm-strip-sep">·</span>
+            <span class="dsm-strip-item">VPO FOR BRANDS</span><span class="dsm-strip-sep">·</span>
         </div>
     </div>
 
@@ -954,8 +955,16 @@
 
         /* ── Main canvas app ─────────────────────────────────────────────── */
         function App() {
+            const [businessOpen, setBusinessOpen] = useState(() => document.getElementById('business-page')?.classList.contains('bp-visible'));
+            useEffect(() => {
+                const enter = () => setBusinessOpen(true), exit = () => setBusinessOpen(false);
+                window.addEventListener('vpo:enter-business', enter);
+                window.addEventListener('vpo:exit-business', exit);
+                return () => { window.removeEventListener('vpo:enter-business', enter); window.removeEventListener('vpo:exit-business', exit); };
+            }, []);
             return (
                 <Canvas
+                    frameloop={businessOpen ? "never" : "always"}
                     gl={{ antialias: true, alpha: true, toneMapping: THREE.ACESFilmicToneMapping }}
                     onCreated={({ gl }) => {
                         /* Transparent clear — DSM strip (z-5) and cursor glow (z-9) show through */
@@ -1577,6 +1586,19 @@
     transition: opacity .9s var(--ease), transform .9s var(--ease);
 }
 .bp-reveal.revealed { opacity: 1; transform: translateY(0); }
+
+/* Brand preview integration */
+#brand-demo-shortcut { position:fixed;z-index:10000;top:28px;right:28px;padding:13px 18px;border:1px solid #d1b78a50;background:#15120dcc;color:#e8d7b7;font:9px var(--mono);letter-spacing:.08em;cursor:pointer;backdrop-filter:blur(10px); }
+.brand-intro-demo { margin:16px 0 30px;padding:16px 24px;background:#ded0b5; }
+.brand-tier-details { border-top:1px solid rgba(255,255,255,.1);padding-top:20px;margin:24px 0; }
+.brand-tier-details summary { display:flex;justify-content:space-between;list-style:none;cursor:pointer;font:10px var(--mono);color:rgba(235,233,228,.65); }
+.brand-tier-details summary::-webkit-details-marker { display:none; }
+.brand-tier-details summary span { transition:transform .2s; }
+.brand-tier-details[open] summary span { transform:rotate(45deg); }
+.brand-tier-details .bp-tier-features { margin-top:22px; }
+#bp-features,#bp-tiers,#bp-process,#bp-outcomes,#bp-future,#bp-join { scroll-margin-top:56px; }
+@media(max-width:700px) { #bp-nav { padding:0 18px;gap:15px; } .bp-nav-links { gap:14px; } .bp-nav-link { font-size:7px;letter-spacing:.04em; } .bp-nav-link:nth-last-child(-n+2) { display:none; } .bp-nav-cta { padding:9px 12px;font-size:8px;letter-spacing:.06em; } .brand-intro-demo { padding:15px 20px;font-size:9px; } #brand-demo-shortcut { top:24px;right:18px;font-size:8px;padding:12px; } .bp-container { padding:0 22px; } .bp-section { padding:70px 0; } .bp-tier-grid { grid-template-columns:1fr; } }
+@media(prefers-reduced-motion:reduce) { #business-page { transition:none; } .bp-nav-brand,.dsm-strip-track { animation:none; } }
 </style>
 
 <!-- BUSINESS PAGE SHELL -->
@@ -1586,6 +1608,7 @@
     <nav id="bp-nav">
         <a class="bp-nav-brand" href="/" onclick="(window.top||window).location.href='/'; return false;" title="Back to VPO">VPO.</a>
         <div class="bp-nav-links">
+            <button class="bp-nav-link" onclick="document.getElementById('bp-features').scrollIntoView({behavior:'smooth'})">Experience</button>
             <button class="bp-nav-link" onclick="document.getElementById('bp-process').scrollIntoView({behavior:'smooth'})">Process</button>
             <button class="bp-nav-link" onclick="document.getElementById('bp-tiers').scrollIntoView({behavior:'smooth'})">Tiers</button>
             <button class="bp-nav-link" onclick="document.getElementById('bp-outcomes').scrollIntoView({behavior:'smooth'})">Outcomes</button>
@@ -1600,9 +1623,10 @@
             <button class="bp-back-btn" onclick="window.dispatchEvent(new CustomEvent('vpo:exit-business'))">
                 ← Return to Experience
             </button>
-            <p class="bp-kicker">The VPO Partner Program</p>
+            <p class="bp-kicker">VPO for Brands</p>
             <h1 class="bp-intro-headline">Design a world<br><em>worth entering.</em></h1>
             <p class="bp-intro-sub">VPO gives luxury brands the architecture to transcend flat e-commerce — immersive 3D flagship worlds, virtual try-on, live social shopping. Choose the tier that matches your ambition.</p>
+            <button class="bp-nav-cta brand-intro-demo" onclick="document.getElementById('bp-features').scrollIntoView({behavior:'smooth'})">Explore the brand experience ↗</button>
             <div class="bp-paths">
                 <div class="bp-path gold" onclick="document.getElementById('bp-tiers').scrollIntoView({behavior:'smooth'})">✦ Gold Partner — from $1,999/mo</div>
                 <div class="bp-path plat" onclick="document.getElementById('bp-tiers').scrollIntoView({behavior:'smooth'})">✦ Platinum Partner — from $5,999/mo</div>
@@ -1639,11 +1663,16 @@
 
     <hr class="bp-divider">
 
+    <!-- Interactive brand previews: bundled React/Three.js, isolated from the legacy introduction. -->
+    <section id="bp-features" aria-label="Explore the VPO brand experience" style="scroll-margin-top:56px">
+        <iframe id="brand-experience-frame" src="/brand-experience" title="VPO interactive brand demonstrations" loading="lazy" allow="fullscreen" style="display:block;width:100%;height:2580px;border:0;background:#080705;overflow:hidden" scrolling="no"></iframe>
+    </section>
+
     <!-- §3 TIERS -->
     <section id="bp-tiers" class="bp-section">
         <div class="bp-container">
             <div class="bp-reveal">
-                <span class="bp-kicker">02 — Partnership Tiers</span>
+                <span class="bp-kicker">03 — Partnership Tiers</span>
                 <h2 class="bp-h2">Choose your world.</h2>
                 <p class="bp-lead">Two tiers. One purpose: elevating your brand above the static. Select the level of immersion your brand deserves.</p>
             </div>
@@ -1660,7 +1689,7 @@
                         <span class="bp-price-period">Billed annually · $23,988/yr</span>
                         <span class="bp-price-note">One-time setup: $4,500 · No lock-in after year one</span>
                     </div>
-                    <ul class="bp-tier-features">
+                    <details class="brand-tier-details"><summary>Explore partnership details <span>+</span></summary><ul class="bp-tier-features">
                         <li><span class="bp-feat-dot"></span>3 curated boutique environment templates</li>
                         <li><span class="bp-feat-dot"></span>Up to 500 SKUs with 3D product display</li>
                         <li><span class="bp-feat-dot"></span>Standard lighting, materials &amp; ambience</li>
@@ -1669,7 +1698,7 @@
                         <li><span class="bp-feat-dot"></span>Community lobby (shared district)</li>
                         <li><span class="bp-feat-dot"></span>Mobile + desktop compatible</li>
                         <li><span class="bp-feat-dot"></span>Standard support — 48hr SLA</li>
-                    </ul>
+                    </ul></details>
                     <button class="bp-tier-cta" onclick="document.getElementById('bp-join').scrollIntoView({behavior:'smooth'})">Apply for Gold →</button>
                 </div>
 
@@ -1685,7 +1714,7 @@
                         <span class="bp-price-period">Billed annually · $71,988/yr</span>
                         <span class="bp-price-note">One-time setup: $12,000 · Includes 6-week white-glove build</span>
                     </div>
-                    <ul class="bp-tier-features">
+                    <details class="brand-tier-details"><summary>Explore partnership details <span>+</span></summary><ul class="bp-tier-features">
                         <li><span class="bp-feat-dot"></span>Fully bespoke custom 3D architecture</li>
                         <li><span class="bp-feat-dot"></span>Unlimited SKUs — full inventory sync</li>
                         <li><span class="bp-feat-dot"></span>Virtual Try-On — clothing, eyewear, accessories</li>
@@ -1697,66 +1726,14 @@
                         <li><span class="bp-feat-dot"></span>API access + custom domain + branded URL</li>
                         <li><span class="bp-feat-dot"></span>Dedicated account manager + weekly consult</li>
                         <li><span class="bp-feat-dot"></span>Priority support — 2hr SLA</li>
-                    </ul>
+                    </ul></details>
                     <button class="bp-tier-cta" onclick="document.getElementById('bp-join').scrollIntoView({behavior:'smooth'})">Apply for Platinum →</button>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- §4 FEATURE MATRIX -->
-    <section id="bp-features" class="bp-section">
-        <div class="bp-container">
-            <div class="bp-reveal">
-                <span class="bp-kicker">03 — Feature Comparison</span>
-                <h2 class="bp-h2">What's included.</h2>
-            </div>
-            <table class="bp-feat-table bp-reveal">
-                <thead>
-                    <tr class="bp-table-head">
-                        <th></th>
-                        <th class="th-gold">Gold</th>
-                        <th class="th-plat">Platinum</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr><td colspan="3" class="bp-feat-cat">Store Environment</td></tr>
-                    <tr class="bp-feat-row"><td class="bp-feat-name">3D Environment</td><td class="bp-feat-check has-gold"></td><td class="bp-feat-check has-plat"></td></tr>
-                    <tr class="bp-feat-row"><td class="bp-feat-name">Curated Templates</td><td class="bp-feat-check has-gold"></td><td class="bp-feat-check has-plat"></td></tr>
-                    <tr class="bp-feat-row"><td class="bp-feat-name">Custom Bespoke Architecture</td><td class="bp-feat-check no-feat"></td><td class="bp-feat-check has-plat"></td></tr>
-                    <tr class="bp-feat-row"><td class="bp-feat-name">Branded Custom Domain</td><td class="bp-feat-check no-feat"></td><td class="bp-feat-check has-plat"></td></tr>
-                    <tr class="bp-feat-row"><td class="bp-feat-name">Day/Night Ambience Cycle</td><td class="bp-feat-check no-feat"></td><td class="bp-feat-check has-plat"></td></tr>
 
-                    <tr><td colspan="3" class="bp-feat-cat">Customer Experience</td></tr>
-                    <tr class="bp-feat-row"><td class="bp-feat-name">3D Product Display</td><td class="bp-feat-check has-gold"></td><td class="bp-feat-check has-plat"></td></tr>
-                    <tr class="bp-feat-row"><td class="bp-feat-name">Virtual Try-On (AR/AI)</td><td class="bp-feat-check no-feat"></td><td class="bp-feat-check has-plat"></td></tr>
-                    <tr class="bp-feat-row"><td class="bp-feat-name">AI Personal Stylist</td><td class="bp-feat-check no-feat"></td><td class="bp-feat-check has-plat"></td></tr>
-                    <tr class="bp-feat-row"><td class="bp-feat-name">Custom Avatar System</td><td class="bp-feat-check no-feat"></td><td class="bp-feat-check has-plat"></td></tr>
-                    <tr class="bp-feat-row"><td class="bp-feat-name">Multiplayer / Social Lobby</td><td class="bp-feat-check has-gold"></td><td class="bp-feat-check has-plat"></td></tr>
-                    <tr class="bp-feat-row"><td class="bp-feat-name">Private Invite-Only Rooms</td><td class="bp-feat-check no-feat"></td><td class="bp-feat-check has-plat"></td></tr>
-                    <tr class="bp-feat-row"><td class="bp-feat-name">Live Runway / Event Hosting</td><td class="bp-feat-check no-feat"></td><td class="bp-feat-check has-plat"></td></tr>
-
-                    <tr><td colspan="3" class="bp-feat-cat">Commerce &amp; Inventory</td></tr>
-                    <tr class="bp-feat-row"><td class="bp-feat-name">Product SKU Limit</td><td class="bp-feat-name" style="font-size:11px;color:rgba(235,233,228,.35);padding:0;">Up to 500</td><td class="bp-feat-name" style="font-size:11px;color:rgba(235,233,228,.35);padding:0;">Unlimited</td></tr>
-                    <tr class="bp-feat-row"><td class="bp-feat-name">Real-Time Inventory Sync</td><td class="bp-feat-check no-feat"></td><td class="bp-feat-check has-plat"></td></tr>
-                    <tr class="bp-feat-row"><td class="bp-feat-name">API Access &amp; Webhooks</td><td class="bp-feat-check no-feat"></td><td class="bp-feat-check has-plat"></td></tr>
-                    <tr class="bp-feat-row"><td class="bp-feat-name">Shopify / Magento Integration</td><td class="bp-feat-check has-gold"></td><td class="bp-feat-check has-plat"></td></tr>
-
-                    <tr><td colspan="3" class="bp-feat-cat">Analytics &amp; Insights</td></tr>
-                    <tr class="bp-feat-row"><td class="bp-feat-name">Traffic &amp; Dwell Analytics</td><td class="bp-feat-check has-gold"></td><td class="bp-feat-check has-plat"></td></tr>
-                    <tr class="bp-feat-row"><td class="bp-feat-name">Heatmap &amp; Interaction Data</td><td class="bp-feat-check no-feat"></td><td class="bp-feat-check has-plat"></td></tr>
-                    <tr class="bp-feat-row"><td class="bp-feat-name">Weekly Performance Consulting</td><td class="bp-feat-check no-feat"></td><td class="bp-feat-check has-plat"></td></tr>
-                    <tr class="bp-feat-row"><td class="bp-feat-name">Monthly Report</td><td class="bp-feat-check has-gold"></td><td class="bp-feat-check has-plat"></td></tr>
-
-                    <tr><td colspan="3" class="bp-feat-cat">Support &amp; Services</td></tr>
-                    <tr class="bp-feat-row"><td class="bp-feat-name">Standard Support (48hr SLA)</td><td class="bp-feat-check has-gold"></td><td class="bp-feat-check has-plat"></td></tr>
-                    <tr class="bp-feat-row"><td class="bp-feat-name">Priority Support (2hr SLA)</td><td class="bp-feat-check no-feat"></td><td class="bp-feat-check has-plat"></td></tr>
-                    <tr class="bp-feat-row"><td class="bp-feat-name">Dedicated Account Manager</td><td class="bp-feat-check no-feat"></td><td class="bp-feat-check has-plat"></td></tr>
-                    <tr class="bp-feat-row"><td class="bp-feat-name">White-Glove Onboarding (6 wk)</td><td class="bp-feat-check no-feat"></td><td class="bp-feat-check has-plat"></td></tr>
-                </tbody>
-            </table>
-        </div>
-    </section>
 
     <!-- §5 BUSINESS OUTCOMES -->
     <section id="bp-outcomes" class="bp-section">
@@ -1941,7 +1918,7 @@
     /* All fixed 3D UI elements to mute while business page is active */
     var vpo3dIds = ['cursor-glow','dsm-title-strip',
                     'brand-corner','frame-progress','scroll-hint',
-                    'noise','vignette'];
+                    'noise','vignette','brand-demo-shortcut'];
     var observersInited = false;
 
     /* ── Enter business page ────────────────────────────────────────── */
@@ -1977,6 +1954,9 @@
         /* Reveal business page */
         bp.scrollTop = 0;
         bp.classList.add('bp-visible');
+        var loader = document.getElementById('loader');
+        if (loader) loader.remove();
+        notifyExperience();
 
         /* Boot observers once (first open) */
         if (!observersInited) {
@@ -2070,6 +2050,29 @@
         bp.querySelectorAll('.bp-step').forEach(function(el) {
             stepObs.observe(el);
         });
+    }
+
+    // Only accept sizing and navigation messages from our same-origin demonstration frame.
+    var experienceFrame = document.getElementById('brand-experience-frame');
+    function notifyExperience() {
+        var frame = document.getElementById('brand-experience-frame');
+        if (frame && frame.contentWindow && bp.classList.contains('bp-visible')) {
+            frame.contentWindow.postMessage({type:'vpo:brand-experience-visible'}, window.location.origin);
+        }
+    }
+    window.addEventListener('message', function(event) {
+        if (event.origin !== window.location.origin || event.source !== experienceFrame.contentWindow || !event.data) return;
+        if (event.data.type === 'vpo:brand-experience-height' && Number.isFinite(event.data.height)) {
+            experienceFrame.style.height = Math.max(600, Math.min(12000, event.data.height + 2)) + 'px';
+        }
+        if (event.data.type === 'vpo:brand-experience-ready') notifyExperience();
+        if (event.data.type === 'vpo:brand-experience-tiers') document.getElementById('bp-tiers').scrollIntoView({behavior:'smooth'});
+    });
+    var preview = new URLSearchParams(window.location.search).get('preview');
+    if (preview) {
+        enterBusiness();
+        var section = preview === 'tiers' ? 'bp-tiers' : 'bp-features';
+        requestAnimationFrame(function() { document.getElementById(section).scrollIntoView(); });
     }
 
     /* ── Animated counter ───────────────────────────────────────────── */

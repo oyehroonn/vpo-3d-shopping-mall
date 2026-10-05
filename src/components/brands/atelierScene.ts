@@ -4,7 +4,7 @@ import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment
 
 // Original VPO model. All surfaces, seams and hardware are geometry, not stock imagery.
 const smooth = (v: number) => { const t = THREE.MathUtils.clamp(v, 0, 1); return t * t * (3 - 2 * t); };
-const gold = () => new THREE.MeshStandardMaterial({ color: '#c8ab73', metalness: .92, roughness: .24 });
+const gold = () => new THREE.MeshStandardMaterial({ color: '#c8ab73', metalness: .92, roughness: .32, envMapIntensity: .8 });
 const material = (color: string, roughness = .6) => new THREE.MeshStandardMaterial({ color, roughness });
 function box(parent: THREE.Object3D, size: number[], at: number[], mat: THREE.Material, radius = .03) {
   const mesh = new THREE.Mesh(new RoundedBoxGeometry(size[0], size[1], size[2], 3, Math.min(radius, Math.min(...size) / 2)), mat);
@@ -36,9 +36,9 @@ function stoneTexture() {
   const t = new THREE.CanvasTexture(canvas); t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 8; return t;
 }
 
-export function buildHandbag(grain: THREE.Texture, color = '#86431e') {
+export function buildHandbag(grain: THREE.Texture, color = '#754021', details?: { normal: THREE.Texture; roughness: THREE.Texture }) {
   const bag = new THREE.Group();
-  const leather = new THREE.MeshPhysicalMaterial({ color, roughness: .48, bumpMap: grain, bumpScale: .012, clearcoat: .16, clearcoatRoughness: .55 });
+  const leather = new THREE.MeshPhysicalMaterial({ color, roughness: details ? .84 : .52, bumpMap: grain, bumpScale: .007, normalMap: details?.normal, normalScale: new THREE.Vector2(.65, .65), roughnessMap: details?.roughness, clearcoat: .18, clearcoatRoughness: .48, envMapIntensity: .7 });
   const edge = material('#3c2319', .48); const brass = gold(); const thread = material('#c9a170');
   // Slightly bowed, tapering front and back panels with a soft rounded rectangular cross-section.
   const geometry = new THREE.BufferGeometry(); const positions: number[] = []; const uvs: number[] = []; const indices: number[] = [];
@@ -53,7 +53,7 @@ export function buildHandbag(grain: THREE.Texture, color = '#86431e') {
         y + .018 * Math.sin(a * 2) * Math.sin(v * Math.PI),
         Math.sign(s) * Math.pow(Math.abs(s), .36) * depth + Math.sin(v * Math.PI) * .017 * Math.sin(a));
       uvs.push(i / slices * 2, v);
-      if (j < rings && i < slices) { const k = j * (slices + 1) + i; indices.push(k, k + 1, k + slices + 1, k + 1, k + slices + 2, k + slices + 1); }
+      if (j < rings && i < slices) { const k = j * (slices + 1) + i; indices.push(k, k + slices + 1, k + 1, k + 1, k + slices + 1, k + slices + 2); }
     }
   }
   geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3)); geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2)); geometry.setIndex(indices); geometry.computeVertexNormals();
@@ -111,7 +111,7 @@ export type StudioState = { time: number; playing: boolean; visible: boolean; ni
 export function createAtelier(host: HTMLElement, state: StudioState, onReady: (photo: string) => void, onError: () => void) {
   let renderer: THREE.WebGLRenderer;
   try { renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, preserveDrawingBuffer: true, powerPreference: 'high-performance' }); } catch { onError(); return () => {}; }
-  renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.22;
+  renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.06;
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.localClippingEnabled = true; renderer.setClearColor('#211910'); host.appendChild(renderer.domElement);
   renderer.domElement.setAttribute('aria-label', 'Animated 3D atelier: cognac leather handbag with saddle stitching and brass hardware on a travertine shelf');
@@ -119,9 +119,17 @@ export function createAtelier(host: HTMLElement, state: StudioState, onReady: (p
   const camera = new THREE.PerspectiveCamera(37, 1, .1, 60);
   const pmrem = new THREE.PMREMGenerator(renderer); const room = new RoomEnvironment(); const env = pmrem.fromScene(room, .04); scene.environment = env.texture; room.dispose(); pmrem.dispose();
   const grain = grainTexture(); const stone = stoneTexture();
+  let assetsRemaining = 2;
+  const assetFinished = () => { assetsRemaining--; };
+  const textureLoader = new THREE.TextureLoader();
+  const details = { normal: textureLoader.load('/brands/leather-normal-4k.webp', assetFinished, undefined, assetFinished), roughness: textureLoader.load('/brands/leather-roughness-4k.webp', assetFinished, undefined, assetFinished) };
+  for (const texture of Object.values(details)) { texture.wrapS = texture.wrapT = THREE.RepeatWrapping; texture.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy()); }
   const travertine = new THREE.MeshStandardMaterial({ map: stone, roughness: .69, bumpMap: stone, bumpScale: .025 });
   const walnut = material('#352a20', .61); const bronze = gold(); const dark = material('#15130f', .77);
   const lightMat = new THREE.MeshBasicMaterial({ color: '#ffdf9f' });
+  const scanStone = new THREE.Color('#252a26');
+  const naturalStone = new THREE.Color('#ffffff');
+  const alcoveLights: THREE.PointLight[] = [];
   box(scene, [22, .18, 18], [0, -.13, 0], travertine);
   box(scene, [16, 7, .2], [0, 3, -2.08], walnut);
   // Architectural framing and luminous, inset stone bays.
@@ -136,7 +144,7 @@ export function createAtelier(host: HTMLElement, state: StudioState, onReady: (p
     box(scene, [3.7, .024, .026], [x, 1.094, -.9], lightMat, .008);
     box(scene, [3.86, .055, .7], [x, 3.55, -1.37], bronze);
     box(scene, [3.64, .023, .02], [x, 3.507, -1.02], lightMat, .005);
-    const alcoveLight = new THREE.PointLight('#ffd6a0', 6, 5, 2); alcoveLight.position.set(x, 3.3, -1); scene.add(alcoveLight);
+    const alcoveLight = new THREE.PointLight('#ffd6a0', 6, 5, 2); alcoveLight.position.set(x, 3.3, -1); scene.add(alcoveLight); alcoveLights.push(alcoveLight);
   }
   for (let i = 0; i < 53; i++) box(scene, [.055, 5.6, .08], [-6.7 + i * .25, 2.8, -1.92], walnut, .009);
   // The foreground shelf is the replacement destination, with an existing black piece.
@@ -144,18 +152,18 @@ export function createAtelier(host: HTMLElement, state: StudioState, onReady: (p
   box(scene, [3.81, .033, 1.5], [0, 1.04, .3], bronze, .01);
   box(scene, [2.8, 1.02, 1], [0, .50, .2], walnut);
   for (let i = 0; i < 30; i++) box(scene, [.036, 1, .05], [-1.37 + i * .095, .5, .71], bronze, .006);
-  const bag = buildHandbag(grain); scene.add(bag);
-  const oldBag = buildHandbag(grain, '#191a17'); oldBag.position.set(0, 1.225, .25); oldBag.rotation.y = -.10; scene.add(oldBag);
+  const bag = buildHandbag(grain, '#754021', details); scene.add(bag);
+  const oldBag = buildHandbag(grain, '#191a17', details); oldBag.position.set(0, 1.225, .25); oldBag.rotation.y = -.10; scene.add(oldBag);
   for (const [x, y, z, scale, color] of [[-3.65, 1.25, -1.22, .76, '#30322b'], [3.65, 1.25, -1.22, .7, '#613021'], [-.75, 3.58, -1.25, .57, '#211f1b'], [4.25, 3.58, -1.25, .58, '#8a6043']] as const) {
-    const b = buildHandbag(grain, color); b.position.set(x, y, z); b.scale.setScalar(scale); b.rotation.y = -.18; scene.add(b);
+    const b = buildHandbag(grain, color, details); b.position.set(x, y, z); b.scale.setScalar(scale); b.rotation.y = -.18; scene.add(b);
   }
   // Cloth-like display pads and an understated sculptural vessel.
   box(scene, [2, .03, .72], [0, 1.233, .25], dark, .014);
   const vase = new THREE.Mesh(new THREE.LatheGeometry(Array.from({ length: 32 }, (_, i) => { const t = i / 31; return new THREE.Vector2(.12 + Math.sin(t * Math.PI) * .16, t * .65); }), 48), travertine);
   vase.position.set(1.28, 1.24, .1); vase.castShadow = true; scene.add(vase);
-  const ambient = new THREE.HemisphereLight('#e9e3d5', '#3e2a17', 1.9); scene.add(ambient);
-  const key = new THREE.DirectionalLight('#fff2d9', 3.2); key.position.set(-3, 6, 5); key.castShadow = true; key.shadow.mapSize.set(2048, 2048); key.shadow.camera.left = -8; key.shadow.camera.right = 8; key.shadow.camera.top = 8; key.shadow.camera.bottom = -6; key.shadow.normalBias = .025; scene.add(key);
-  const fill = new THREE.DirectionalLight('#d6dfef', 1.8); fill.position.set(5, 4, 2); scene.add(fill);
+  const ambient = new THREE.HemisphereLight('#e9e3d5', '#3e2a17', .9); scene.add(ambient);
+  const key = new THREE.DirectionalLight('#fff2d9', 2.2); key.position.set(-3, 6, 5); key.castShadow = true; key.shadow.mapSize.set(2048, 2048); key.shadow.camera.left = -8; key.shadow.camera.right = 8; key.shadow.camera.top = 8; key.shadow.camera.bottom = -6; key.shadow.normalBias = .025; scene.add(key);
+  const fill = new THREE.DirectionalLight('#d6dfef', .65); fill.position.set(5, 4, 2); scene.add(fill);
   const wire = new THREE.Group(); const revealPlane = new THREE.Plane(new THREE.Vector3(0, -1, 0), 5);
   bag.updateMatrixWorld(true);
   bag.traverse(obj => {
@@ -167,13 +175,14 @@ export function createAtelier(host: HTMLElement, state: StudioState, onReady: (p
   const bodyPositions = (bag.children[0] as THREE.Mesh).geometry.getAttribute('position');
   for (let i = 0; i < bodyPositions.count; i += 3) particleData.push(bodyPositions.getX(i), bodyPositions.getY(i), bodyPositions.getZ(i));
   particlesGeo.setAttribute('position', new THREE.Float32BufferAttribute(particleData, 3));
-  const dots = new THREE.Points(particlesGeo, new THREE.PointsMaterial({ color: '#cbffe1', size: .016, transparent: true, opacity: .8 })); scene.add(dots);
+  const dots = new THREE.Points(particlesGeo, new THREE.PointsMaterial({ color: '#cbffe1', size: .016, transparent: true, opacity: .8, clippingPlanes: [revealPlane] })); scene.add(dots);
   const scan = new THREE.Mesh(new THREE.PlaneGeometry(2.4, 1.2), new THREE.MeshBasicMaterial({ color: '#bde5ce', transparent: true, opacity: .14, side: THREE.DoubleSide, depthWrite: false })); scan.rotation.x = -Math.PI / 2; scene.add(scan);
   const scanEdge = new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-1.2, 0, -.6), new THREE.Vector3(1.2, 0, -.6), new THREE.Vector3(1.2, 0, .6), new THREE.Vector3(-1.2, 0, .6)]), new THREE.LineBasicMaterial({ color: '#c3f9e0', transparent: true, opacity: .8 })); scene.add(scanEdge);
   let width = 0, height = 0, lastQuality = '', disposed = false, frame = 0, lastFrame = 0, captured = false;
+  let renderKey = '', settlingFrames = 40;
   const resize = () => {
     width = host.clientWidth; height = host.clientHeight; if (!width || !height) return;
-    const ratio = state.quality === '4k' ? Math.min(3840 / width, 4) : Math.min(window.devicePixelRatio, 1.75);
+    const ratio = state.quality === '4k' ? Math.min(3840, renderer.capabilities.maxTextureSize) / Math.max(width, height) : Math.min(window.devicePixelRatio, 1.75);
     renderer.setPixelRatio(ratio); renderer.setSize(width, height); camera.aspect = width / height; camera.updateProjectionMatrix(); lastQuality = state.quality;
   };
   const observer = new ResizeObserver(resize); observer.observe(host); resize();
@@ -183,13 +192,16 @@ export function createAtelier(host: HTMLElement, state: StudioState, onReady: (p
     if ((!state.visible || document.hidden) && captured) return;
     if (now - lastFrame < (state.reducedMotion ? 100 : 1000 / 40)) return; lastFrame = now;
     if (lastQuality !== state.quality) resize();
+    const nextKey = `${state.time}/${state.night}/${state.rotation}/${state.quality}/${width}/${height}`;
+    if (nextKey !== renderKey) { renderKey = nextKey; settlingFrames = 40; }
+    else if (captured && settlingFrames-- <= 0) return;
     const t = state.time; const stage = t < 6 ? 0 : t < 13 ? 1 : t < 20 ? 2 : 3;
     const placement = smooth((t - 21) / 4); const raised = stage === 0 ? 0 : 1 - placement;
-    const rotation = stage === 1 ? (t - 6) * .52 : stage === 2 ? (t - 13) * .52 + 3.64 : 7.28 * (1 - placement);
+    const rotation = stage === 1 ? (t - 6) * .22 : stage === 2 ? (t - 13) * .82 + 1.54 : 7.28 * (1 - placement);
     bag.position.set(stage === 0 ? 0 : -.2 * raised, 1.25 + raised * .5, .25 + raised * .3);
     bag.rotation.y = stage === 0 ? -.22 + state.rotation : rotation - .22 + state.rotation;
     bag.visible = stage !== 1; bag.scale.setScalar(1);
-    oldBag.visible = stage !== 0 && placement < .85; oldBag.scale.setScalar(1 - placement); oldBag.position.x = placement * -1.4;
+    oldBag.visible = stage === 3 && placement < .85; oldBag.scale.setScalar(1 - placement); oldBag.position.x = placement * -1.4;
     if (stage === 2) {
       const materialReveal = smooth((t - 13) / 3); bag.scale.setScalar(.97 + materialReveal * .03);
       bag.traverse(obj => { if (obj instanceof THREE.Mesh && obj.material instanceof THREE.MeshStandardMaterial) { obj.material.clippingPlanes = materialReveal < 1 ? [revealPlane] : []; } });
@@ -201,11 +213,22 @@ export function createAtelier(host: HTMLElement, state: StudioState, onReady: (p
     if (stage === 1) revealPlane.constant = scan.position.y;
     const distance = stage === 3 ? 1 + placement * .22 : 1;
     const mobile = width < 600; cameraTarget.set((stage === 1 ? 3.1 : 2.7) * distance, 2.65 + raised * .42, (mobile ? 9.7 : 6.4) * distance);
-    camera.position.lerp(cameraTarget, captured ? .06 : 1); look.set(-.10, 2.03 + raised * .30, 0); camera.lookAt(look);
-    ambient.intensity = THREE.MathUtils.lerp(ambient.intensity, state.night ? .4 : 1.9, .05); key.intensity = THREE.MathUtils.lerp(key.intensity, state.night ? .5 : 3.2, .05);
-    renderer.toneMappingExposure = THREE.MathUtils.lerp(renderer.toneMappingExposure, state.night ? .83 : 1.22, .05);
+    camera.position.lerp(cameraTarget, captured ? .06 : 1); look.set(mobile && stage === 3 ? .55 : -.10, 2.03 + raised * .30, 0); camera.lookAt(look);
+    const scanning = stage === 1;
+    travertine.color.lerp(scanning ? scanStone : naturalStone, .10);
+    alcoveLights.forEach(light => { light.intensity = THREE.MathUtils.lerp(light.intensity, scanning ? .6 : 6, .1); });
+    ambient.intensity = THREE.MathUtils.lerp(ambient.intensity, state.night || scanning ? .25 : .9, .05); key.intensity = THREE.MathUtils.lerp(key.intensity, state.night || scanning ? .4 : 2.2, .05);
+    renderer.toneMappingExposure = THREE.MathUtils.lerp(renderer.toneMappingExposure, state.night ? .75 : 1.06, .05);
     renderer.render(scene, camera);
-    if (!captured) { captured = true; onReady(renderer.domElement.toDataURL('image/jpeg', .88)); }
+    if (!captured && assetsRemaining === 0) {
+      // A missing optional material map must not prevent the original model from loading.
+      scene.traverse(obj => { if (obj instanceof THREE.Mesh && obj.material instanceof THREE.MeshStandardMaterial) {
+        if (obj.material.normalMap && !obj.material.normalMap.image) { obj.material.normalMap = null; obj.material.needsUpdate = true; }
+        if (obj.material.roughnessMap && !obj.material.roughnessMap.image) { obj.material.roughnessMap = null; obj.material.needsUpdate = true; }
+      } });
+      renderer.render(scene, camera);
+      captured = true; onReady(renderer.domElement.toDataURL('image/jpeg', .88));
+    }
   }; frame = requestAnimationFrame(render);
   const contextLost = (e: Event) => { e.preventDefault(); onError(); }; renderer.domElement.addEventListener('webglcontextlost', contextLost);
   return () => {
