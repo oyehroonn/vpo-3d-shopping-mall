@@ -1,5 +1,7 @@
 # VPO — Virtual Premium Outlets
 
+**New features coming soon**
+
 ### Your friends. Your favourite stores. Considerably less airfare.
 
 What if you went shopping today?
