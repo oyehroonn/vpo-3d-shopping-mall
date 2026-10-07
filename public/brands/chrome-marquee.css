@@ -1,0 +1,68 @@
+/* Original beveled chrome artwork, shared by both brands entry documents. */
+#dsm-title-strip {
+    --wordmark-width: max(1020px, 132vw);
+    position: fixed;
+    top: 50%;
+    left: 0;
+    right: 0;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    padding-block: 24px;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 50;
+    user-select: none;
+    background: transparent;
+    /* Fade the artwork itself so the photography stays visible at the edges. */
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+}
+
+@keyframes dsm-strip-scroll {
+    from { transform: translate3d(-50%, 0, 0); }
+    to { transform: translate3d(0, 0, 0); }
+}
+
+.dsm-strip-track {
+    display: flex;
+    align-items: center;
+    width: max-content;
+    will-change: transform;
+    animation: dsm-strip-scroll 32s linear infinite;
+}
+
+/* Identical halves keep the rightward loop seamless, including on resize. */
+.dsm-strip-group {
+    display: flex;
+    align-items: center;
+    flex: none;
+}
+
+.dsm-strip-item {
+    display: block;
+    flex: none;
+    width: var(--wordmark-width);
+    max-width: none;
+    height: auto;
+    filter: drop-shadow(0 3px 2px rgb(0 0 0 / 45%))
+            drop-shadow(0 0 12px rgb(196 221 240 / 10%));
+    -webkit-user-drag: none;
+}
+
+.dsm-strip-sep {
+    flex: none;
+    width: 5px;
+    height: 5px;
+    margin-inline: clamp(30px, 3.3vw, 64px);
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 25%, #f4f5f7, #8b9ea8 42%, #303740 80%);
+    box-shadow: 0 0 10px rgb(178 204 224 / 15%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .dsm-strip-track {
+        animation: none;
+        will-change: auto;
+    }
+}

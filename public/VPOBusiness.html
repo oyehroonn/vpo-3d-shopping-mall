@@ -10,6 +10,12 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Instrument+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 
+    <!-- Locally rendered chrome lettering, available before the 3D scene. -->
+    <link rel="stylesheet" href="/brands/chrome-marquee.css">
+    <link rel="preload" as="image" href="/brands/vpo-for-brands-chrome.webp"
+          imagesrcset="/brands/vpo-for-brands-chrome.webp 3840w, /brands/vpo-for-brands-chrome-8k.webp 7680w"
+          imagesizes="(max-width: 772px) 1020px, 132vw">
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
@@ -87,79 +93,6 @@
             left: 50%; top: 50%;
             transition: left .6s cubic-bezier(.16,1,.3,1), top .6s cubic-bezier(.16,1,.3,1);
             mix-blend-mode: screen;
-        }
-
-        /* ─── DSM TITLE STRIP — pure floating text, no box, no border ──────── */
-        #dsm-title-strip {
-            position: fixed;
-            top: 50%;
-            left: 0; right: 0;
-            transform: translateY(-50%);
-            height: clamp(80px, 12vh, 120px);
-            display: flex;
-            align-items: center;
-            overflow: hidden;
-            pointer-events: none;
-            z-index: 50;
-            user-select: none;
-            /* No background, no border, no backdrop — just text */
-            background: transparent;
-        }
-        /* Edge masks so text fades in/out at viewport edges (not a hard clip) */
-        #dsm-title-strip::before,
-        #dsm-title-strip::after {
-            content: '';
-            position: absolute;
-            top: 0; bottom: 0;
-            width: 10vw;
-            z-index: 2;
-            pointer-events: none;
-        }
-        #dsm-title-strip::before {
-            left: 0;
-            background: linear-gradient(90deg, var(--bg) 0%, transparent 100%);
-        }
-        #dsm-title-strip::after {
-            right: 0;
-            background: linear-gradient(270deg, var(--bg) 0%, transparent 100%);
-        }
-        @keyframes dsm-strip-scroll {
-            /* Rightward: enters from left, exits to right */
-            from { transform: translateX(-50%); }
-            to   { transform: translateX(0%);   }
-        }
-        .dsm-strip-track {
-            display: flex;
-            align-items: center;
-            width: max-content;
-            will-change: transform;
-            animation: dsm-strip-scroll 32s linear infinite;
-            white-space: nowrap;
-            font-family: var(--serif);
-            font-style: italic;
-            font-weight: 300;
-            font-size: clamp(2rem, 4.2vw, 3.8rem);
-            letter-spacing: -0.02em;
-            /* Bright, fully visible text */
-            color: rgba(235,233,228,.92);
-            line-height: 1;
-            /* Thick blurred glow around the letterforms — the "border" effect */
-            text-shadow:
-                0 0 0px   rgba(235,233,228,.90),   /* sharp inner edge */
-                0 0 18px  rgba(235,233,228,.28),   /* close soft halo  */
-                0 0 50px  rgba(235,233,228,.12),   /* wide outer bloom */
-                0 0 90px  rgba(120,165,220,.08);   /* faint blue corona */
-        }
-        .dsm-strip-item { display: inline-block; }
-        .dsm-strip-sep  {
-            display: inline-block;
-            margin: 0 3rem;
-            /* Subtle separator dot — not a rectangle, just a glyph */
-            color: rgba(120,165,220,.50);
-            font-style: normal;
-            font-size: .45em;
-            vertical-align: middle;
-            text-shadow: 0 0 12px rgba(120,165,220,.45);
         }
 
         /* ─── FILM GRAIN + VIGNETTE ─────────────────────────────────────────── */
@@ -419,22 +352,34 @@
     <!-- Ambient cursor glow (behind canvas, shows through transparency) -->
     <div id="cursor-glow" aria-hidden="true"></div>
 
-    <!-- VPO FOR BRANDS — horizontal moving title strip (behind canvas) -->
+    <!-- Original chrome wordmark; two identical halves preserve the rightward loop. -->
     <div id="dsm-title-strip" aria-hidden="true">
         <div class="dsm-strip-track">
-            <span class="dsm-strip-item">VPO FOR BRANDS</span><span class="dsm-strip-sep">·</span>
-            <span class="dsm-strip-item">VPO FOR BRANDS</span><span class="dsm-strip-sep">·</span>
-            <span class="dsm-strip-item">VPO FOR BRANDS</span><span class="dsm-strip-sep">·</span>
-            <span class="dsm-strip-item">VPO FOR BRANDS</span><span class="dsm-strip-sep">·</span>
-            <span class="dsm-strip-item">VPO FOR BRANDS</span><span class="dsm-strip-sep">·</span>
-            <span class="dsm-strip-item">VPO FOR BRANDS</span><span class="dsm-strip-sep">·</span>
-            <!-- Exact duplicate for seamless loop -->
-            <span class="dsm-strip-item">VPO FOR BRANDS</span><span class="dsm-strip-sep">·</span>
-            <span class="dsm-strip-item">VPO FOR BRANDS</span><span class="dsm-strip-sep">·</span>
-            <span class="dsm-strip-item">VPO FOR BRANDS</span><span class="dsm-strip-sep">·</span>
-            <span class="dsm-strip-item">VPO FOR BRANDS</span><span class="dsm-strip-sep">·</span>
-            <span class="dsm-strip-item">VPO FOR BRANDS</span><span class="dsm-strip-sep">·</span>
-            <span class="dsm-strip-item">VPO FOR BRANDS</span><span class="dsm-strip-sep">·</span>
+            <div class="dsm-strip-group">
+                <img class="dsm-strip-item" src="/brands/vpo-for-brands-chrome.webp"
+                     srcset="/brands/vpo-for-brands-chrome.webp 3840w, /brands/vpo-for-brands-chrome-8k.webp 7680w"
+                     sizes="(max-width: 772px) 1020px, 132vw" width="3840" height="288"
+                     alt="" draggable="false" decoding="async" fetchpriority="high">
+                <span class="dsm-strip-sep"></span>
+                <img class="dsm-strip-item" src="/brands/vpo-for-brands-chrome.webp"
+                     srcset="/brands/vpo-for-brands-chrome.webp 3840w, /brands/vpo-for-brands-chrome-8k.webp 7680w"
+                     sizes="(max-width: 772px) 1020px, 132vw" width="3840" height="288"
+                     alt="" draggable="false" decoding="async" fetchpriority="high">
+                <span class="dsm-strip-sep"></span>
+            </div>
+            <!-- Exact duplicate for a seamless loop. -->
+            <div class="dsm-strip-group">
+                <img class="dsm-strip-item" src="/brands/vpo-for-brands-chrome.webp"
+                     srcset="/brands/vpo-for-brands-chrome.webp 3840w, /brands/vpo-for-brands-chrome-8k.webp 7680w"
+                     sizes="(max-width: 772px) 1020px, 132vw" width="3840" height="288"
+                     alt="" draggable="false" decoding="async" fetchpriority="high">
+                <span class="dsm-strip-sep"></span>
+                <img class="dsm-strip-item" src="/brands/vpo-for-brands-chrome.webp"
+                     srcset="/brands/vpo-for-brands-chrome.webp 3840w, /brands/vpo-for-brands-chrome-8k.webp 7680w"
+                     sizes="(max-width: 772px) 1020px, 132vw" width="3840" height="288"
+                     alt="" draggable="false" decoding="async" fetchpriority="high">
+                <span class="dsm-strip-sep"></span>
+            </div>
         </div>
     </div>
 
