@@ -17,10 +17,10 @@ from mathutils import Vector
 
 GLYPHS = {
     "V": "M 3 200 L 75 200 L 128 61 L 181 200 L 253 200 L 171 0 L 85 0 Z",
-    "P": "M 0 0 L 0 200 L 191 200 Q 250 200 250 145 L 250 119 Q 250 66 191 66 L 67 66 L 67 0 Z M 67 119 L 174 119 Q 184 119 184 129 L 184 138 Q 184 148 174 148 L 67 148 Z",
+    "P": "M 0 0 L 0 200 L 191 200 Q 250 200 250 145 L 250 119 Q 250 66 191 66 L 67 66 L 67 0 Z M 67 111 L 174 111 Q 184 111 184 121 L 184 143 Q 184 153 174 153 L 67 153 Z",
     "O": "M 57 0 Q 0 0 0 55 L 0 145 Q 0 200 57 200 L 193 200 Q 250 200 250 145 L 250 55 Q 250 0 193 0 Z M 79 53 L 171 53 Q 184 53 184 66 L 184 134 Q 184 147 171 147 L 79 147 Q 66 147 66 134 L 66 66 Q 66 53 79 53 Z",
     "F": "M 0 0 L 0 200 L 239 200 L 239 147 L 67 147 L 67 113 L 216 113 L 216 61 L 67 61 L 67 0 Z",
-    "R": "M 0 0 L 0 200 L 191 200 Q 250 200 250 147 L 250 127 Q 250 84 212 76 L 258 0 L 183 0 L 141 72 L 67 72 L 67 0 Z M 67 124 L 173 124 Q 184 124 184 134 L 184 139 Q 184 149 173 149 L 67 149 Z",
+    "R": "M 0 0 L 0 200 L 191 200 Q 250 200 250 147 L 250 127 Q 250 84 212 76 L 258 0 L 183 0 L 141 72 L 67 72 L 67 0 Z M 67 115 L 173 115 Q 184 115 184 125 L 184 143 Q 184 153 173 153 L 67 153 Z",
     "B": "M 0 0 L 0 200 L 189 200 Q 242 200 242 156 L 242 143 Q 242 112 218 102 Q 250 92 250 59 L 250 46 Q 250 0 196 0 Z M 67 123 L 169 123 Q 179 123 179 133 L 179 139 Q 179 149 169 149 L 67 149 Z M 67 51 L 176 51 Q 186 51 186 61 L 186 67 Q 186 77 176 77 L 67 77 Z",
     "A": "M 0 0 L 86 200 L 178 200 L 264 0 L 192 0 L 178 37 L 85 37 L 71 0 Z M 105 88 L 158 88 L 132 158 Z",
     "N": "M 0 0 L 0 200 L 77 200 L 184 81 L 184 200 L 250 200 L 250 0 L 174 0 L 66 119 L 66 0 Z",
@@ -62,10 +62,31 @@ def chrome_material():
     shader.inputs["Roughness"].default_value = 0.24
     shader.inputs["Coat Weight"].default_value = 0.32
     shader.inputs["Coat Roughness"].default_value = 0.16
+    shader.inputs["Base Color"].default_value = (0.68, 0.73, 0.8, 1)
+
+    bevel = nodes.new("ShaderNodeBevel")
+    bevel.inputs["Radius"].default_value = 0.065
+    bevel.samples = 6
+    links.new(bevel.outputs["Normal"], shader.inputs["Normal"])
 
     coords = nodes.new("ShaderNodeNewGeometry")
     separate = nodes.new("ShaderNodeSeparateXYZ")
     links.new(coords.outputs["Position"], separate.inputs[0])
+    local = nodes.new("ShaderNodeTexCoord")
+    local_axes = nodes.new("ShaderNodeSeparateXYZ")
+    links.new(local.outputs["Generated"], local_axes.inputs[0])
+    arc_angle = nodes.new("ShaderNodeMath")
+    arc_angle.operation = "MULTIPLY"
+    arc_angle.inputs[1].default_value = math.pi
+    links.new(local_axes.outputs["X"], arc_angle.inputs[0])
+    arc = nodes.new("ShaderNodeMath")
+    arc.operation = "SINE"
+    links.new(arc_angle.outputs[0], arc.inputs[0])
+    curved_face = nodes.new("ShaderNodeMath")
+    curved_face.operation = "MULTIPLY_ADD"
+    curved_face.inputs[1].default_value = 0.075
+    links.new(arc.outputs[0], curved_face.inputs[0])
+    links.new(separate.outputs["Y"], curved_face.inputs[2])
     ramp = nodes.new("ShaderNodeValToRGB")
     # The front has a gently curved reflection horizon. The actual rounded
     # geometry supplies the fine edge reflections and the recessed counters.
@@ -74,8 +95,8 @@ def chrome_material():
         (0.16, (0.49, 0.52, 0.55, 1)),
         (0.43, (0.10, 0.10, 0.12, 1)),
         (0.57, (0.25, 0.17, 0.11, 1)),
-        (0.65, (0.87, 0.83, 0.70, 1)),
-        (0.70, (0.65, 0.84, 0.95, 1)),
+        (0.65, (1.10, 0.97, 0.75, 1)),
+        (0.70, (0.78, 1.03, 1.20, 1)),
         (0.79, (0.025, 0.035, 0.045, 1)),
         (1.00, (0.012, 0.016, 0.02, 1)),
     ]
@@ -84,10 +105,32 @@ def chrome_material():
         element = ramp.color_ramp.elements[0] if i == 0 else ramp.color_ramp.elements.new(position)
         element.position, element.color = position, color
     ramp.color_ramp.interpolation = "B_SPLINE"
-    links.new(separate.outputs["Y"], ramp.inputs["Fac"])
-    links.new(ramp.outputs["Color"], shader.inputs["Base Color"])
-    links.new(ramp.outputs["Color"], shader.inputs["Emission Color"])
-    shader.inputs["Emission Strength"].default_value = 0.65
+    normal = nodes.new("ShaderNodeSeparateXYZ")
+    links.new(bevel.outputs["Normal"], normal.inputs[0])
+    horizon = nodes.new("ShaderNodeMath")
+    horizon.operation = "MULTIPLY_ADD"
+    links.new(normal.outputs["Y"], horizon.inputs[0])
+    horizon.inputs[1].default_value = 0.24
+    links.new(curved_face.outputs[0], horizon.inputs[2])
+    links.new(horizon.outputs[0], ramp.inputs["Fac"])
+
+    # Art-directed studio sweep on the face, true reflective metal on its
+    # curved edges. Rounded normals bend the colored horizon into the bevel.
+    face = nodes.new("ShaderNodeEmission")
+    face.inputs[1].default_value = 1.1
+    links.new(ramp.outputs["Color"], face.inputs[0])
+    facing = nodes.new("ShaderNodeLayerWeight")
+    facing.inputs["Blend"].default_value = 0.28
+    links.new(bevel.outputs["Normal"], facing.inputs["Normal"])
+    edge = nodes.new("ShaderNodeMath")
+    edge.operation = "POWER"
+    edge.inputs[1].default_value = 0.38
+    links.new(facing.outputs["Facing"], edge.inputs[0])
+    mix = nodes.new("ShaderNodeMixShader")
+    links.new(edge.outputs[0], mix.inputs[0])
+    links.new(face.outputs[0], mix.inputs[1])
+    links.new(shader.outputs[0], mix.inputs[2])
+    links.new(mix.outputs[0], nodes.get("Material Output").inputs["Surface"])
     return material
 
 
@@ -129,7 +172,7 @@ def main():
         curve.dimensions, curve.fill_mode = "2D", "BOTH"
         curve.resolution_u = 16
         curve.extrude = 0.034
-        curve.bevel_depth = 0.028
+        curve.bevel_depth = 0.034
         curve.bevel_resolution = 8
         for points in outlines:
             spline = curve.splines.new("POLY")
@@ -144,6 +187,12 @@ def main():
         letters.append(obj)
         cursor += max(p[0] for outline in outlines for p in outline) / 200 + 0.105
 
+    bpy.ops.object.select_all(action="DESELECT")
+    for obj in letters:
+        obj.select_set(True)
+    bpy.context.view_layer.objects.active = letters[0]
+    bpy.ops.object.convert(target="MESH")
+
     width = cursor - 0.105
     center = (width / 2, 0.5, 0)
     softbox("Upper pearl rim", (width / 2, 3.6, 2.0), (width * 1.5, 1.4, 1), (0.76, 0.85, 1), 4, center)
@@ -152,6 +201,8 @@ def main():
     softbox("Champagne bounce", (width / 2, -0.8, 4.5), (width * 1.5, 0.6, 1), (1, 0.74, 0.46), 1.4, center)
     for x in (-1, width + 1):
         softbox("Edge card", (x, 0.5, 1.4), (0.65, 3, 1), (0.81, 0.89, 1), 5, center)
+    for x in (3.2, 7.8, 12.8):
+        softbox("Vertical pearl reflection", (x, 0.65, 2), (0.24, 2.8, 1), (0.88, 0.95, 1), 5, (x, 0.5, 0))
 
     bpy.ops.object.camera_add(location=(width / 2, 0.64, 15))
     camera = bpy.context.object
