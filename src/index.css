@@ -122,22 +122,143 @@ html {
 }
 
 @layer components {
-  .cooking-notice {
-    @apply relative inline-grid font-display font-semibold;
-    color: hsl(38 12% 65%);
+  .version-selector {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: flex;
+    overflow-y: auto;
+    padding: clamp(2rem, 6vh, 4.5rem) 1.5rem;
+    background: radial-gradient(ellipse at 50% 42%, #141416 0%, #080809 45%, #030303 78%);
+  }
+
+  .version-selector__content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(2.5rem, 6vh, 4.5rem);
+    width: 100%;
+    max-width: 76rem;
+    margin: auto;
+    text-align: center;
+  }
+
+  .version-selector__brand {
+    font-size: clamp(1.05rem, 2.5vw, 2.25rem);
     line-height: 1.5;
-    letter-spacing: 0.04em;
-    white-space: nowrap;
+    letter-spacing: 0.3em;
+    text-wrap: balance;
+  }
+
+  .cooking-notice {
+    position: relative;
+    display: inline-grid;
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+    font-size: clamp(2.25rem, 8.7vw, 8rem);
+    font-weight: 900;
+    line-height: 0.94;
+    letter-spacing: -0.065em;
+    text-transform: uppercase;
   }
 
   .cooking-notice > span {
     grid-area: 1 / 1;
   }
 
+  .cooking-notice__line {
+    display: block;
+    padding: 0.035em 0.06em;
+    color: #d6cfc1;
+    background: linear-gradient(
+      175deg,
+      #f5f4f1 0%,
+      #a6adb5 9%,
+      #454a53 29%,
+      #747f8c 39%,
+      #d7e3e9 46%,
+      #fffaf0 50%,
+      #c5b49a 56%,
+      #77716a 65%,
+      #d7d3cc 83%,
+      #faf9f6 94%,
+      #a9afb8 100%
+    );
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    -webkit-text-stroke: 0.7px rgb(233 235 239 / 55%);
+  }
+
+  .cooking-notice__line--large {
+    font-size: 1.39em;
+  }
+
+  .cooking-notice__base {
+    opacity: 0.48;
+    filter: drop-shadow(0 1px 1px rgb(224 231 241 / 20%));
+  }
+
   .cooking-notice__fill {
-    color: hsl(39 55% 82%);
+    /* Reveal one continuous metallic finish from left to right. */
     clip-path: inset(0 100% 0 0);
-    animation: cooking-fill 5.5s linear infinite;
+    filter: drop-shadow(0 0 2px rgb(229 236 245 / 45%)) drop-shadow(0 0 15px rgb(209 198 178 / 18%));
+    animation: cooking-fill 6.5s linear infinite;
+  }
+
+  .version-selector__choices {
+    width: min(100%, 40rem);
+  }
+
+  .version-selector__prompt {
+    margin-bottom: 1.5rem;
+    color: #92908c;
+    font-size: 0.625rem;
+    letter-spacing: 0.3em;
+  }
+
+  .version-selector__options {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(0.875rem, 2.5vw, 2rem);
+  }
+
+  .version-selector__option {
+    position: relative;
+    display: grid;
+    place-items: center;
+    min-height: clamp(8rem, 17vh, 10rem);
+    padding: 2rem 0.5rem;
+    border: 1px solid rgb(223 218 208 / 22%);
+    border-radius: 0.25rem;
+    background: linear-gradient(155deg, rgb(255 255 255 / 3%), rgb(255 255 255 / 0%));
+    transition: border-color 250ms ease, background-color 250ms ease, box-shadow 250ms ease;
+  }
+
+  .version-selector__option:hover {
+    border-color: rgb(223 218 208 / 60%);
+    background-color: rgb(255 255 255 / 4%);
+    box-shadow: 0 0 24px rgb(223 218 208 / 4%);
+  }
+
+  .version-selector__option:focus-visible {
+    outline: 2px solid #d6cfc1;
+    outline-offset: 5px;
+  }
+
+  .version-selector__option-name {
+    font-family: var(--font-serif);
+    font-size: clamp(1.2rem, 2.2vw, 1.75rem);
+    letter-spacing: 0.15em;
+    text-indent: 0.15em;
+  }
+
+  .version-selector__connection {
+    position: absolute;
+    inset: auto 0.5rem 1.1rem;
+    color: #9a9790;
+    font-size: clamp(0.45rem, 1.5vw, 0.5625rem);
+    letter-spacing: 0.12em;
   }
 
   @keyframes cooking-fill {
@@ -159,6 +280,10 @@ html {
     .cooking-notice__fill {
       animation: none;
       clip-path: none;
+    }
+
+    .version-selector__option {
+      transition: none;
     }
   }
 

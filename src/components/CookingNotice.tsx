@@ -5,12 +5,16 @@ interface CookingNoticeProps {
 }
 
 const CookingNotice = ({ className }: CookingNoticeProps) => (
-  <p className={cn("cooking-notice", className)}>
-    <span>something is cooking</span>
-    <span className="cooking-notice__fill" aria-hidden="true">
-      something is cooking
+  <h2 className={cn("cooking-notice", className)} aria-label="Something’s cooking">
+    <span className="cooking-notice__base" aria-hidden="true">
+      <span className="cooking-notice__line">something’s</span>
+      <span className="cooking-notice__line cooking-notice__line--large">cooking</span>
     </span>
-  </p>
+    <span className="cooking-notice__fill" aria-hidden="true">
+      <span className="cooking-notice__line">something’s</span>
+      <span className="cooking-notice__line cooking-notice__line--large">cooking</span>
+    </span>
+  </h2>
 );
 
 export default CookingNotice;

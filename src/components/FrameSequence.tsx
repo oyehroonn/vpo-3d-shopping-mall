@@ -3,7 +3,6 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import vpoHeroBg from "@/assets/vpo-hero-bg.jpeg";
 import VersionSelector from "./VersionSelector";
-import CookingNotice from "./CookingNotice";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -234,9 +233,6 @@ const FrameSequence = () => {
           loading="eager"
           decoding="sync"
         />
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-center bg-gradient-to-t from-background/90 to-transparent px-6 pb-12 pt-24 md:pb-16">
-          <CookingNotice className="text-2xl md:text-3xl" />
-        </div>
       </section>
     );
   }
@@ -251,7 +247,6 @@ const FrameSequence = () => {
         {isLoading ? (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 bg-background">
             <div className="grain-overlay" />
-            <CookingNotice className="text-2xl md:text-3xl" />
             
             {/* Spinning loader */}
             <div className="relative w-16 h-16">
@@ -304,9 +299,6 @@ const FrameSequence = () => {
             loading="eager"
             decoding="sync"
           />
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-center bg-gradient-to-t from-background/90 to-transparent px-6 pb-12 pt-24 md:pb-16">
-            <CookingNotice className="text-2xl md:text-3xl" />
-          </div>
         </section>
       )}
     </div>
