@@ -2,6 +2,8 @@
 
 **New features coming soon**
 
+A navigable store demo is coming soon in the next version.
+
 ### Your friends. Your favourite stores. Considerably less airfare.
 
 What if you went shopping today?
