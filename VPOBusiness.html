@@ -336,6 +336,9 @@
     </style>
 </head>
 <body class="antialiased">
+<div id="business-page" tabindex="0" role="region" aria-label="VPO for Brands experience and partnerships">
+    <section id="brand-story" aria-label="The VPO experience">
+    <div id="brand-story-stage">
     <button id="brand-demo-shortcut" onclick="window.dispatchEvent(new CustomEvent('vpo:enter-business'));document.getElementById('bp-features').scrollIntoView({behavior:'smooth'});">Explore brand demos ↗</button>
 
     <!-- Film grain + vignette -->
@@ -414,6 +417,9 @@
     <!-- Editorial overlays -->
     <div id="vpo-editorial-root" aria-live="polite"></div>
 
+    </div><!-- #brand-story-stage -->
+    </section><!-- #brand-story -->
+
     <!-- Cursor glow tracker -->
     <script>
         (function() {
@@ -444,7 +450,7 @@
         import { createRoot } from 'react-dom/client';
         import * as THREE from 'three';
         import { Canvas, useFrame, useThree } from '@react-three/fiber';
-        import { ScrollControls, useScroll, Image as DreiImage, Environment, Lightformer, useProgress, Text, Float } from '@react-three/drei';
+        import { Image as DreiImage, Environment, Lightformer, useProgress, Text, Float } from '@react-three/drei';
 
         /* ── Error boundary ─────────────────────────────────────────────── */
         class ErrorBoundary extends React.Component {
@@ -526,14 +532,23 @@
             }
         ];
 
-        /* ── Scroll buffer constants ────────────────────────────────────── *
-         * BUFFER_PAGES adds extra scroll height after the last frame so it  *
-         * "locks" as a full-screen hero while the user keeps scrolling.     *
-         * Once they enter that buffer zone we auto-trigger the business      *
-         * page transition — exactly like scrolling to a new section.        */
-        const BUFFER_PAGES  = 0.8;
-        const TOTAL_PAGES   = FRAMES.length + BUFFER_PAGES;    // 5.8
-        const FINALE_OFFSET = FRAMES.length / TOTAL_PAGES;     // ≈ 0.862
+        // One native scroll position drives both the story and the page below it.
+        const experienceScroll = { offset: 0 };
+        function NativeScrollTimeline() {
+            const scroller = document.getElementById('business-page');
+            const story = document.getElementById('brand-story');
+            const stage = document.getElementById('brand-story-stage');
+            const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
+            useFrame((state, delta) => {
+                // Finish just before the sticky stage releases, holding section 05
+                // and its photograph together for the natural scroll into the page.
+                const distance = Math.max(1, (story.offsetHeight - stage.offsetHeight) * .94);
+                const target = THREE.MathUtils.clamp(scroller.scrollTop / distance, 0, 1);
+                experienceScroll.offset = motion.matches || target === 1 ? target :
+                    THREE.MathUtils.damp(experienceScroll.offset, target, 1 / .14, delta);
+            }, -1);
+            return null;
+        }
 
         /* ── Loading controller ─────────────────────────────────────────── */
         function LoadingController() {
@@ -550,18 +565,16 @@
         /* ── Camera rig ─────────────────────────────────────────────────── */
         function SceneRig() {
             const { camera } = useThree();
-            const scroll = useScroll();
+            const scroll = experienceScroll;
             const startZ = 4;
             const last = FRAMES[FRAMES.length - 1];
             const endZ = last.finale ? last.imgZ + 5.4 : last.imgZ + 10;
             useFrame((state, delta) => {
-                // Normalize offset to the content portion only.
-                // Camera freezes at the finale position while the user scrolls
-                // through the exit buffer zone — last frame stays hero-pinned.
-                const contentOff = Math.min(scroll.offset / FINALE_OFFSET, 1.0);
+                const contentOff = scroll.offset;
                 const targetZ = THREE.MathUtils.lerp(startZ, endZ, contentOff);
                 const damp = contentOff > .72 ? 3.1 : 4;
-                camera.position.z = THREE.MathUtils.damp(camera.position.z, targetZ, damp, delta);
+                camera.position.z = contentOff === 1 ? endZ :
+                    THREE.MathUtils.damp(camera.position.z, targetZ, damp, delta);
                 camera.position.x = THREE.MathUtils.damp(camera.position.x, state.pointer.x * .38, 2, delta);
                 camera.position.y = THREE.MathUtils.damp(camera.position.y, state.pointer.y * .38, 2, delta);
             });
@@ -613,7 +626,7 @@
 
         /* ── DSM strip: fade out strip as scroll begins, slightly speed up ─ */
         function DSMStripCoupler() {
-            const scroll = useScroll();
+            const scroll = experienceScroll;
             useFrame(() => {
                 const strip = document.getElementById('dsm-title-strip');
                 const track = document.querySelector('.dsm-strip-track');
@@ -773,14 +786,11 @@
 
         /* ── Scroll timeline publisher ───────────────────────────────────── */
         function ScrollTimelinePub() {
-            const scroll = useScroll();
-            // One-shot ref: prevents firing vpo:enter-business every frame
-            const triggered = useRef(false);
+            const scroll = experienceScroll;
             useFrame(() => {
                 const total  = FRAMES.length;
                 const rawOff = THREE.MathUtils.clamp(scroll.offset, 0, 1);
-                // Normalize to content portion so frame timing is identical to before
-                const off = Math.min(rawOff / FINALE_OFFSET, 1.0);
+                const off = rawOff;
                 const t = off * total;
                 const idx = Math.max(0, Math.min(total - 1, Math.floor(t)));
                 const local = t - idx;
@@ -788,7 +798,7 @@
 
                 const fadeIn  = THREE.MathUtils.smoothstep(local, .06, .26);
                 const fadeOut = isFinale
-                    ? 1 - THREE.MathUtils.smoothstep(local, .90, .998)
+                    ? 1
                     : 1 - THREE.MathUtils.smoothstep(local, .74, .94);
                 const alpha = Math.max(0, Math.min(1, fadeIn * fadeOut));
 
@@ -818,17 +828,6 @@
                     detail: { offset: off, idx, local, total, alpha, reveal, reveal2, ctaReveal }
                 }));
 
-                // ── Auto-transition into business page ───────────────────────
-                // When the user scrolls past the content zone into the buffer,
-                // fire the business page slide-in (like scrolling to a new section).
-                // Reset the trigger if they scroll back into the content zone.
-                if (rawOff > FINALE_OFFSET + 0.06 && !triggered.current) {
-                    triggered.current = true;
-                    window.dispatchEvent(new CustomEvent('vpo:enter-business'));
-                }
-                if (rawOff < FINALE_OFFSET - 0.02 && triggered.current) {
-                    triggered.current = false; // allow re-trigger if user scrolls back
-                }
             });
             return null;
         }
@@ -893,16 +892,17 @@
 
         /* ── Main canvas app ─────────────────────────────────────────────── */
         function App() {
-            const [businessOpen, setBusinessOpen] = useState(() => document.getElementById('business-page')?.classList.contains('bp-visible'));
+            const [experienceVisible, setExperienceVisible] = useState(true);
             useEffect(() => {
-                const enter = () => setBusinessOpen(true), exit = () => setBusinessOpen(false);
-                window.addEventListener('vpo:enter-business', enter);
-                window.addEventListener('vpo:exit-business', exit);
-                return () => { window.removeEventListener('vpo:enter-business', enter); window.removeEventListener('vpo:exit-business', exit); };
+                const observer = new IntersectionObserver(([entry]) => {
+                    setExperienceVisible(entry.isIntersecting);
+                }, { root: document.getElementById('business-page'), rootMargin: '150px 0px' });
+                observer.observe(document.getElementById('brand-story'));
+                return () => observer.disconnect();
             }, []);
             return (
                 <Canvas
-                    frameloop={businessOpen ? "never" : "always"}
+                    frameloop={experienceVisible ? "always" : "never"}
                     gl={{ antialias: true, alpha: true, toneMapping: THREE.ACESFilmicToneMapping }}
                     onCreated={({ gl }) => {
                         /* Transparent clear — DSM strip (z-5) and cursor glow (z-9) show through */
@@ -925,7 +925,8 @@
                     </Environment>
 
                     <Suspense fallback={null}>
-                        <ScrollControls pages={TOTAL_PAGES} damping={.14} distance={1.25}>
+                        <>
+                            <NativeScrollTimeline />
                             <SceneRig />
                             <DSMStripCoupler />
                             <ScrollTimelinePub />
@@ -934,7 +935,7 @@
                                     <PremiumImage key={frame.id} data={frame} />
                                 ))}
                             </group>
-                        </ScrollControls>
+                        </>
                     </Suspense>
                 </Canvas>
             );
@@ -959,33 +960,31 @@
 
 
 <!-- ═══════════════════════════════════════════════════════════════════════
-     BUSINESS PAGE — slides over the 3D experience on "Explore" click
+     BUSINESS PAGE — continuous scrolling from the final story frame
 ═══════════════════════════════════════════════════════════════════════════ -->
 <style id="bp-styles">
-/* ── Page shell ──────────────────────────────────────────────────────── */
+/* A single native scroller for the story, partnerships and embedded demos. */
 #business-page {
     position: fixed; inset: 0;
-    overflow-y: scroll;            /* 'scroll' not 'auto' — always shows scrollbar track */
+    overflow-y: auto;
     overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain;  /* stop scroll chaining to anything beneath */
+    overscroll-behavior-y: contain;
     background: #080705;
-    z-index: 200;
-    opacity: 0;
-    pointer-events: none;
-    transform: translateY(32px);
-    transition: opacity 1s cubic-bezier(.16,1,.3,1), transform 1s cubic-bezier(.16,1,.3,1);
-    visibility: hidden;            /* hidden keeps it out of tab order when invisible */
+    scrollbar-width: none;
 }
-#business-page.bp-visible {
-    opacity: 1;
-    pointer-events: auto;
-    transform: translateY(0);
-    visibility: visible;
-}
-/* Ensure the bp scrollbar stays invisible (matches app aesthetic) */
 #business-page::-webkit-scrollbar { display: none; }
-#business-page { scrollbar-width: none; }
+#brand-story { position: relative; height: 640svh; }
+#brand-story-stage {
+    position: sticky; top: 0;
+    height: 100svh;
+    overflow: hidden;
+    isolation: isolate;
+    /* Keep all canvas chrome and editorial panels attached to the same stage. */
+    transform: translateZ(0);
+}
+#brand-story-stage #root,
+#brand-story-stage #vpo-editorial-root { width: 100%; height: 100%; }
 
 /* Shared section padding */
 .bp-section { padding: 120px 0; position: relative; }
@@ -1039,14 +1038,6 @@
     font-family: var(--sans); font-size: 15px; font-weight: 300; line-height: 1.8;
     color: rgba(235,233,228,.5); max-width: 52ch; margin: 0 auto 48px;
 }
-.bp-back-btn {
-    display: inline-flex; align-items: center; gap: 8px;
-    font-family: var(--mono); font-size: 10px; letter-spacing: .22em; text-transform: uppercase;
-    color: rgba(235,233,228,.35); background: none; border: none; cursor: pointer;
-    transition: color .3s var(--ease);
-    padding: 0; margin-bottom: 80px;
-}
-.bp-back-btn:hover { color: rgba(235,233,228,.7); }
 /* Two path teasers below headline */
 .bp-paths { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-top: 16px; }
 .bp-path {
@@ -1522,7 +1513,7 @@
 .brand-tier-details .bp-tier-features { margin-top:22px; }
 #bp-features,#bp-tiers,#bp-process,#bp-outcomes,#bp-future,#bp-join { scroll-margin-top:56px; }
 @media(max-width:700px) { #bp-nav { padding:0 18px;gap:15px; } .bp-nav-links { gap:14px; } .bp-nav-link { font-size:7px;letter-spacing:.04em; } .bp-nav-link:nth-last-child(-n+2) { display:none; } .bp-nav-cta { padding:9px 12px;font-size:8px;letter-spacing:.06em; } .brand-intro-demo { padding:15px 20px;font-size:9px; } #brand-demo-shortcut { top:24px;right:18px;font-size:8px;padding:12px; } .bp-container { padding:0 22px; } .bp-section { padding:70px 0; } .bp-tier-grid { grid-template-columns:1fr; } }
-@media(prefers-reduced-motion:reduce) { #business-page { transition:none; } .bp-nav-brand,.dsm-strip-track { animation:none; } }
+@media(prefers-reduced-motion:reduce) { .bp-nav-brand,.dsm-strip-track { animation:none; } }
 
 /* The primary scroll experience belongs to the page's native scroller, with no inner scroll trap. */
 .bp-scroll-intro { text-align:center;padding:105px 24px 90px;border-top:1px solid #d4bd9026;background:#080705;color:#e7ddcb; }
@@ -1541,8 +1532,7 @@
 @media(prefers-reduced-motion:reduce) { #bp-scroll-experience { height:calc(100svh - 56px); } .bp-scroll-pin { position:relative;top:0; } }
 </style>
 
-<!-- BUSINESS PAGE SHELL -->
-<div id="business-page">
+<!-- Partnership content continues directly below the story. -->
 
     <!-- Sticky nav -->
     <nav id="bp-nav">
@@ -1560,9 +1550,6 @@
     <!-- §1 INTRO HERO -->
     <section id="bp-intro">
         <div class="bp-intro-inner">
-            <button class="bp-back-btn" onclick="window.dispatchEvent(new CustomEvent('vpo:exit-business'))">
-                ← Return to Experience
-            </button>
             <p class="bp-kicker">VPO for Brands</p>
             <h1 class="bp-intro-headline">Design a world<br><em>worth entering.</em></h1>
             <p class="bp-intro-sub">VPO gives luxury brands the architecture to transcend flat e-commerce — immersive 3D flagship worlds, virtual try-on, live social shopping. Choose the tier that matches your ambition.</p>
@@ -1866,13 +1853,6 @@
 <script>
 (function() {
     var bp            = document.getElementById('business-page');
-    var root3d        = document.getElementById('root');
-    var editorialRoot = document.getElementById('vpo-editorial-root');
-    /* All fixed 3D UI elements to mute while business page is active */
-    var vpo3dIds = ['cursor-glow','dsm-title-strip',
-                    'brand-corner','frame-progress','scroll-hint',
-                    'noise','vignette','brand-demo-shortcut'];
-    var observersInited = false;
     var pageParams = new URLSearchParams(window.location.search);
     var demoMode = pageParams.get('demo') === 'film' ? 'film' : 'scroll';
     var scrollSection = document.getElementById('bp-scroll-experience');
@@ -1884,7 +1864,7 @@
     }
     // Defer the sequence app and every frame until the visitor approaches it.
     function loadScrollExperience() {
-        if (demoMode !== 'scroll' || scrollFrame.hasAttribute('src') || !bp.classList.contains('bp-visible')) return;
+        if (demoMode !== 'scroll' || scrollFrame.hasAttribute('src')) return;
         var bounds = scrollSection.getBoundingClientRect();
         if (bounds.top <= window.innerHeight + 920 && bounds.bottom >= -920) {
             scrollFrame.src = scrollFrame.dataset.src;
@@ -1894,77 +1874,14 @@
     var scrollLoader = new IntersectionObserver(loadScrollExperience, {root:bp,rootMargin:'900px 0px'});
     if (demoMode === 'scroll') scrollLoader.observe(scrollSection);
 
-    /* ── Enter business page ────────────────────────────────────────── */
+    // Shortcuts use the same scroll path as wheel, touch and keyboard input.
     function enterBusiness() {
-        /*
-         * Root cause of scroll-lock:
-         *  1. @react-three/drei ScrollControls inserts a div INSIDE #root
-         *     with overflow:auto that captures ALL wheel events in the viewport.
-         *  2. `body { overflow:hidden }` on some browsers prevents even a
-         *     position:fixed child from scrolling.
-         *
-         * Fix:
-         *  A. Kill pointer-events on #root → its ScrollControls div stops
-         *     intercepting wheel/touch events.
-         *  B. Change body overflow to auto (safe — nothing overflows
-         *     document flow since every element is fixed/absolute).
-         *  C. Business page is already z-200, pointer-events:auto, overflow-y:scroll.
-         */
-        document.body.style.overflow = 'auto';
-        root3d.style.pointerEvents   = 'none';
-        if (editorialRoot) editorialRoot.style.pointerEvents = 'none';
-
-        /* Fade out all 3D chrome */
-        vpo3dIds.forEach(function(id) {
-            var el = document.getElementById(id);
-            if (el) {
-                el.style.transition = 'opacity .6s ease';
-                el.style.opacity    = '0';
-                el.style.pointerEvents = 'none';
-            }
+        bp.scrollTo({
+            top: document.getElementById('brand-story').offsetHeight,
+            behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
         });
-
-        /* Reveal business page */
-        bp.scrollTop = 0;
-        bp.classList.add('bp-visible');
-        var loader = document.getElementById('loader');
-        if (loader) loader.remove();
-        notifyExperience();
-        loadScrollExperience();
-
-        /* Boot observers once (first open) */
-        if (!observersInited) {
-            observersInited = true;
-            setTimeout(initObservers, 400);
-        } else {
-            /* Re-trigger reveals that haven't fired yet */
-            setTimeout(function() {
-                bp.querySelectorAll('.bp-reveal:not(.revealed)').forEach(function(el) {
-                    revealObs.observe(el);
-                });
-            }, 400);
-        }
     }
-
-    /* ── Exit back to 3D experience ─────────────────────────────────── */
-    function exitBusiness() {
-        bp.classList.remove('bp-visible');
-
-        setTimeout(function() {
-            /* Restore body + 3D events */
-            document.body.style.overflow  = 'hidden';
-            root3d.style.pointerEvents     = '';
-            if (editorialRoot) editorialRoot.style.pointerEvents = '';
-
-            vpo3dIds.forEach(function(id) {
-                var el = document.getElementById(id);
-                if (el) { el.style.opacity = ''; el.style.pointerEvents = ''; }
-            });
-        }, 1100);
-    }
-
     window.addEventListener('vpo:enter-business', enterBusiness);
-    window.addEventListener('vpo:exit-business',  exitBusiness);
 
     /* ── Observers (created once, root = bp scroll container) ───────── */
     var revealObs, metricObs, journeyObs;
@@ -2030,7 +1947,7 @@
     var experienceFrame = document.getElementById('brand-experience-frame');
     function notifyExperience() {
         var frame = document.getElementById('brand-experience-frame');
-        if (frame && frame.contentWindow && bp.classList.contains('bp-visible')) {
+        if (frame && frame.contentWindow) {
             frame.contentWindow.postMessage({type:'vpo:brand-experience-visible'}, window.location.origin);
         }
     }
@@ -2043,8 +1960,8 @@
         if (event.data.type === 'vpo:brand-experience-tiers') document.getElementById('bp-tiers').scrollIntoView({behavior:'smooth'});
     });
     var preview = new URLSearchParams(window.location.search).get('preview');
+    initObservers();
     if (preview) {
-        enterBusiness();
         var section = preview === 'scroll' && demoMode === 'scroll' ? 'bp-scroll-experience' : preview === 'tiers' ? 'bp-tiers' : 'bp-features';
         requestAnimationFrame(function() { document.getElementById(section).scrollIntoView(); });
     }
