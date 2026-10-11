@@ -1,7 +1,12 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, useCallback } from "react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const TOTAL_FRAMES = 250;
 const FRAME_BASE_URL = "https://dev.heyharoon.io/scene2/samples_frames/frame";
+const SCROLL_VIEWPORTS = 3;
 
 const FrameSequenceScene2 = () => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -9,7 +14,6 @@ const FrameSequenceScene2 = () => {
   const [images, setImages] = useState<HTMLImageElement[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadedCount, setLoadedCount] = useState(0);
-  const [isHovering, setIsHovering] = useState(false);
   const frameIndexRef = useRef(0);
   const imagesRef = useRef<HTMLImageElement[]>([]);
 
@@ -103,8 +107,9 @@ const FrameSequenceScene2 = () => {
     ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
   }, []);
 
-  // Setup canvas sizing
-  useEffect(() => {
+  // Pin only once the entire scene has reached the viewport. Native scrolling
+  // drives the frames for wheel, touch, keyboard, and scrollbar input alike.
+  useLayoutEffect(() => {
     if (isLoading || images.length === 0) return;
 
     const canvas = canvasRef.current;
@@ -112,106 +117,41 @@ const FrameSequenceScene2 = () => {
     if (!canvas || !container) return;
 
     const resizeCanvas = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      canvas.width = container.clientWidth;
+      canvas.height = container.clientHeight;
       renderFrame(frameIndexRef.current);
     };
 
+    const updateFrame = (progress: number) => {
+      const nextFrame = Math.round(progress * (images.length - 1));
+      if (nextFrame === frameIndexRef.current) return;
+      frameIndexRef.current = nextFrame;
+      renderFrame(nextFrame);
+    };
+
     resizeCanvas();
-    window.addEventListener("resize", resizeCanvas);
-    renderFrame(0);
+
+    const trigger = ScrollTrigger.create({
+      trigger: container,
+      start: "top top",
+      end: () => `+=${window.innerHeight * SCROLL_VIEWPORTS}`,
+      pin: true,
+      pinSpacing: true,
+      // The first scene can finish loading and create its pin after this one.
+      // Measure this scene after that upstream pin during every refresh.
+      refreshPriority: -1,
+      onUpdate: (self) => updateFrame(self.progress),
+      onRefresh: (self) => {
+        updateFrame(self.progress);
+        resizeCanvas();
+      },
+    });
+
+    // Include the new pin spacing in the page's other scroll calculations.
+    ScrollTrigger.refresh();
 
     return () => {
-      window.removeEventListener("resize", resizeCanvas);
-    };
-  }, [isLoading, images, renderFrame]);
-
-  // Wheel event handler - only active when hovering
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container || isLoading || images.length === 0) return;
-
-    const handleWheel = (e: WheelEvent) => {
-      if (!isHovering) return;
-      
-      const delta = e.deltaY;
-      const currentFrame = frameIndexRef.current;
-      const maxFrame = images.length - 1;
-      
-      // Allow normal scroll if at the end and scrolling down
-      if (currentFrame >= maxFrame && delta > 0) {
-        return;
-      }
-      
-      // Allow normal scroll if at the beginning and scrolling up
-      if (currentFrame <= 0 && delta < 0) {
-        return;
-      }
-      
-      // Otherwise, capture the scroll for animation
-      e.preventDefault();
-      e.stopPropagation();
-      
-      const sensitivity = 0.5;
-      const frameChange = Math.sign(delta) * Math.max(1, Math.abs(delta) * sensitivity / 50);
-      
-      frameIndexRef.current = Math.min(
-        Math.max(currentFrame + frameChange, 0),
-        maxFrame
-      );
-      
-      renderFrame(Math.round(frameIndexRef.current));
-    };
-
-    container.addEventListener("wheel", handleWheel, { passive: false });
-
-    return () => {
-      container.removeEventListener("wheel", handleWheel);
-    };
-  }, [isHovering, isLoading, images, renderFrame]);
-
-  // Touch event handler for mobile
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container || isLoading || images.length === 0) return;
-
-    let lastTouchY = 0;
-
-    const handleTouchStart = (e: TouchEvent) => {
-      lastTouchY = e.touches[0].clientY;
-    };
-
-    const handleTouchMove = (e: TouchEvent) => {
-      const currentTouchY = e.touches[0].clientY;
-      const delta = lastTouchY - currentTouchY;
-      lastTouchY = currentTouchY;
-      
-      const currentFrame = frameIndexRef.current;
-      const maxFrame = images.length - 1;
-      
-      // Allow normal scroll at boundaries
-      if (currentFrame >= maxFrame && delta > 0) return;
-      if (currentFrame <= 0 && delta < 0) return;
-      
-      e.preventDefault();
-      
-      const sensitivity = 0.3;
-      const frameChange = delta * sensitivity;
-      
-      frameIndexRef.current = Math.min(
-        Math.max(frameIndexRef.current + frameChange, 0),
-        maxFrame
-      );
-      
-      renderFrame(Math.round(frameIndexRef.current));
-    };
-
-    container.addEventListener("touchstart", handleTouchStart, { passive: true });
-    container.addEventListener("touchmove", handleTouchMove, { passive: false });
-
-    return () => {
-      container.removeEventListener("touchstart", handleTouchStart);
-      container.removeEventListener("touchmove", handleTouchMove);
+      trigger.kill();
     };
   }, [isLoading, images, renderFrame]);
 
@@ -221,9 +161,7 @@ const FrameSequenceScene2 = () => {
     <div className="relative z-0">
       <div
         ref={containerRef}
-        onMouseEnter={() => setIsHovering(true)}
-        onMouseLeave={() => setIsHovering(false)}
-        className="relative h-screen w-full overflow-hidden bg-background cursor-grab active:cursor-grabbing"
+        className="relative h-screen w-full overflow-hidden bg-background"
       >
         {isLoading ? (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-background">
@@ -250,8 +188,7 @@ const FrameSequenceScene2 = () => {
               ref={canvasRef}
               className="absolute inset-0 h-full w-full"
             />
-            {/* Hover indicator */}
-            <div className={`absolute bottom-8 left-1/2 -translate-x-1/2 z-20 transition-opacity duration-300 ${isHovering ? 'opacity-100' : 'opacity-0'}`}>
+            <div className="pointer-events-none absolute bottom-8 left-1/2 z-20 -translate-x-1/2">
               <span className="font-sans text-[10px] tracking-[0.25em] text-foreground/50 uppercase">
                 Scroll to explore
               </span>
