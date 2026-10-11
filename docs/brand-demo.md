@@ -4,6 +4,27 @@ The GSAP frame sequence is the main product demo in **VPO for Brands → Experie
 before the social lobby, inventory, and heatmap previews. The duplicate bottom
 experiment has been removed.
 
+## Scrolling from the opening story
+
+The DSM opening story and partnership content share the native `#business-page`
+scroll container. The canvas, section text, and story controls sit in one sticky
+stage inside `#brand-story`. After section 05, the entire stage scrolls out of
+view with its final photograph and text still visible, followed by “Design a
+world” in normal document flow. Scrolling back up restores the stage and then
+rewinds the story; there is no return button, overlay transition, or scroll reset.
+
+Wheel, touch, keyboard, and section shortcuts use the same scroll position.
+The story renderer pauses offscreen and resumes on return. The embedded Atelier
+sequence further down the page continues to use the same scroll container.
+Both HTML entry documents carry the same scrolling implementation.
+
+Verified locally in Chrome at 1440×960 and 390×844: forward/reverse wheel
+scrolling, repeated boundary crossings, keyboard navigation, mobile touch swipes,
+the finale shortcut, embedded demo chapters, and reduced-motion return from a
+direct partnership preview. The canvas and text keep identical vertical bounds
+as the stage leaves the viewport; no browser errors or horizontal overflow were
+observed.
+
 ## Restore the original 28-second 4K film
 
 Change one value in `src/components/brands/demoMode.ts`:
