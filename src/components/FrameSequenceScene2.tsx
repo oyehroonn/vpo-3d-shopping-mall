@@ -9,7 +9,6 @@ const FRAME_BASE_URL = "https://dev.heyharoon.io/scene2/samples_frames/frame";
 const SCROLL_VIEWPORTS = 3;
 
 const FrameSequenceScene2 = () => {
-  const sectionRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [images, setImages] = useState<HTMLImageElement[]>([]);
@@ -74,8 +73,7 @@ const FrameSequenceScene2 = () => {
   const renderFrame = useCallback((index: number) => {
     const canvas = canvasRef.current;
     const container = containerRef.current;
-    const section = sectionRef.current;
-    if (!canvas || !container || !section) return;
+    if (!canvas || !container) return;
     
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
@@ -134,10 +132,10 @@ const FrameSequenceScene2 = () => {
     resizeCanvas();
 
     const trigger = ScrollTrigger.create({
-      trigger: sectionRef.current,
+      trigger: container,
       start: "top top",
       end: () => `+=${window.innerHeight * SCROLL_VIEWPORTS}`,
-      pin: container,
+      pin: true,
       pinSpacing: true,
       // The first scene can finish loading and create its pin after this one.
       // Measure this scene after that upstream pin during every refresh.
@@ -160,7 +158,7 @@ const FrameSequenceScene2 = () => {
   const loadingProgress = Math.round((loadedCount / TOTAL_FRAMES) * 100);
 
   return (
-    <div ref={sectionRef} className="relative z-0">
+    <div className="relative z-0">
       <div
         ref={containerRef}
         className="relative h-screen w-full overflow-hidden bg-background"

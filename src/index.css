@@ -300,7 +300,8 @@ html {
   .brand-row {
     @apply relative border-t border-border/30 py-12 md:py-16;
     @apply flex items-center justify-between;
-    @apply transition-all duration-500 ease-out;
+    /* Keep responsive padding changes out of the next scene's scroll measurements. */
+    @apply transition-colors duration-500 ease-out;
   }
 
   .brand-row:hover {
