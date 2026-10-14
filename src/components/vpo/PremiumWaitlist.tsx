@@ -142,7 +142,7 @@ const PremiumWaitlist = ({ isLoading }: PremiumWaitlistProps) => {
           You’re on the waitlist for the upcoming stores.
         </p>
       ) : (
-        <div className="premium-waitlist__reveal" data-expanded={expanded} inert={!expanded ? "" : undefined} {...{ "aria-hidden": !expanded }}>
+        <div className="premium-waitlist__reveal" data-expanded={expanded} aria-hidden={!expanded} {...(!expanded ? { inert: "" } : {})}>
           <div>
             <form id="premium-waitlist-form" onSubmit={handleSubmit} aria-busy={status === "submitting"}>
               <label className="premium-waitlist__field">
