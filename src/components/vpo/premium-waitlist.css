@@ -57,7 +57,7 @@
   transition: color 200ms;
 }
 .premium-waitlist__close:hover { color: #fff; }
-.premium-waitlist__reveal { display: grid; grid-template-rows: 0fr; visibility: hidden; transition: grid-template-rows 350ms, visibility 350ms; }
+.premium-waitlist__reveal { display: grid; grid-template-rows: 0fr; visibility: hidden; transition: grid-template-rows 350ms; }
 .premium-waitlist__reveal[data-expanded="true"] { grid-template-rows: 1fr; visibility: visible; }
 .premium-waitlist__reveal > div { overflow: hidden; min-height: 0; }
 .premium-waitlist form { padding: 8px 0 14px; }

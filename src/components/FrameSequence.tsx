@@ -240,9 +240,8 @@ const FrameSequence = () => {
 
   // Premium mode
   return (
-    <>
-    <PremiumWaitlist isLoading={isLoading} />
     <div id="premium-experience" tabIndex={-1} className="relative z-0 overflow-hidden outline-none">
+      <PremiumWaitlist isLoading={isLoading} />
       <div
         ref={containerRef}
         className="relative h-screen w-full overflow-hidden bg-background"
@@ -251,30 +250,29 @@ const FrameSequence = () => {
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 bg-background">
             <div className="grain-overlay" />
             <div className="premium-loading-status flex flex-col items-center gap-6 px-6 text-center">
-            
-            {/* Spinning loader */}
-            <div className="relative w-16 h-16">
-              <div className="absolute inset-0 rounded-full border-2 border-muted" />
-              <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-foreground animate-spin" />
-            </div>
-            
-            {/* Rotating premium message */}
-            <p className="font-display text-lg tracking-[0.2em] text-foreground/90 transition-opacity duration-500">
-              {loadingMessage}
-            </p>
-            
-            {/* Progress bar */}
-            <div className="flex flex-col items-center gap-2">
-              <div className="relative h-[2px] w-48 overflow-hidden bg-muted">
-                <div
-                  className="absolute inset-y-0 left-0 bg-foreground/70 transition-all duration-150 ease-out"
-                  style={{ width: `${loadingProgress}%` }}
-                />
+              {/* Spinning loader */}
+              <div className="relative w-16 h-16">
+                <div className="absolute inset-0 rounded-full border-2 border-muted" />
+                <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-foreground animate-spin" />
               </div>
-              <p className="font-mono text-xs text-muted-foreground/60 tracking-wider">
-                {loadingProgress}%
+
+              {/* Rotating premium message */}
+              <p className="font-display text-lg tracking-[0.2em] text-foreground/90 transition-opacity duration-500">
+                {loadingMessage}
               </p>
-            </div>
+
+              {/* Progress bar */}
+              <div className="flex flex-col items-center gap-2">
+                <div className="relative h-[2px] w-48 overflow-hidden bg-muted">
+                  <div
+                    className="absolute inset-y-0 left-0 bg-foreground/70 transition-all duration-150 ease-out"
+                    style={{ width: `${loadingProgress}%` }}
+                  />
+                </div>
+                <p className="font-mono text-xs text-muted-foreground/60 tracking-wider">
+                  {loadingProgress}%
+                </p>
+              </div>
             </div>
           </div>
         ) : images.length === 0 ? (
@@ -307,7 +305,6 @@ const FrameSequence = () => {
         </section>
       )}
     </div>
-    </>
   );
 };
 
