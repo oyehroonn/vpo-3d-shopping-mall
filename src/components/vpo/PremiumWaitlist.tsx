@@ -19,20 +19,28 @@ const PremiumWaitlist = ({ isLoading }: PremiumWaitlistProps) => {
   const panelRef = useRef<HTMLElement>(null);
   const nameRef = useRef<HTMLInputElement>(null);
   const emailRef = useRef<HTMLInputElement>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
   const wasLoading = useRef(isLoading);
+  const wasExpanded = useRef(expanded);
   const submittingRef = useRef(false);
 
   // The portal remains mounted while the loading screen becomes the canvas.
   useEffect(() => {
     const justLoaded = wasLoading.current && !isLoading;
+    const justOpened = expanded && !wasExpanded.current;
     wasLoading.current = isLoading;
+    wasExpanded.current = expanded;
     if (!expanded || dismissed || status === "success") return;
     if (justLoaded) setArriving(true);
-    if (!panelRef.current?.contains(document.activeElement)) {
+    if (justOpened || !panelRef.current?.contains(document.activeElement)) {
       const nextInput = nameRef.current?.value.trim() ? emailRef.current : nameRef.current;
       nextInput?.focus({ preventScroll: true });
     }
   }, [expanded, isLoading, dismissed, status]);
+
+  useEffect(() => {
+    if (status === "success" && !dismissed) closeRef.current?.focus({ preventScroll: true });
+  }, [status, dismissed]);
 
   useEffect(() => {
     if (dismissed) return;
@@ -132,7 +140,7 @@ const PremiumWaitlist = ({ isLoading }: PremiumWaitlistProps) => {
             <Plus size={13} className={expanded ? "is-expanded" : ""} aria-hidden="true" />
           </button>
         )}
-        <button type="button" className="premium-waitlist__close" onClick={dismiss} aria-label="Close waitlist">
+        <button ref={closeRef} type="button" className="premium-waitlist__close" onClick={dismiss} aria-label="Close waitlist">
           <X size={15} aria-hidden="true" />
         </button>
       </div>
