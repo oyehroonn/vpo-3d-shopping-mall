@@ -1,0 +1,116 @@
+.premium-waitlist {
+  --waitlist-top: calc(50svh + 48px);
+  position: fixed;
+  z-index: 45;
+  top: var(--waitlist-top);
+  left: 50%;
+  width: min(380px, calc(100% - 32px));
+  max-height: calc(100dvh - var(--waitlist-top) - 16px);
+  overflow-y: auto;
+  transform: translateX(-50%);
+  padding: 8px 22px;
+  color: #fff;
+  background: transparent;
+  border: 1px solid rgb(255 255 255 / 5%);
+  -webkit-backdrop-filter: blur(0);
+  backdrop-filter: blur(0);
+  transition: backdrop-filter 500ms, -webkit-backdrop-filter 500ms, border-color 500ms;
+  font-family: var(--font-sans);
+  text-shadow: 0 1px 8px rgb(0 0 0 / 35%);
+}
+
+/* The same transparent surface and 12px hover fog as the navigation. */
+.premium-waitlist:hover,
+.premium-waitlist[data-arriving="true"],
+.premium-waitlist[data-keyboard-focus="true"]:focus-within {
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border-color: rgb(255 255 255 / 12%);
+}
+
+.premium-waitlist__header { display: flex; align-items: center; gap: 16px; }
+.premium-waitlist__toggle,
+.premium-waitlist__title {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 44px;
+  margin: 0;
+  padding: 0;
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  text-align: left;
+}
+.premium-waitlist__toggle { flex: 1; }
+.premium-waitlist__toggle svg { opacity: .55; transition: transform 300ms; }
+.premium-waitlist__toggle svg.is-expanded { transform: rotate(45deg); }
+.premium-waitlist__close {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin: 0 -14px 0 auto;
+  flex-shrink: 0;
+  color: rgb(255 255 255 / 55%);
+  transition: color 200ms;
+}
+.premium-waitlist__close:hover { color: #fff; }
+.premium-waitlist__reveal { display: grid; grid-template-rows: 0fr; visibility: hidden; transition: grid-template-rows 350ms, visibility 350ms; }
+.premium-waitlist__reveal[data-expanded="true"] { grid-template-rows: 1fr; visibility: visible; }
+.premium-waitlist__reveal > div { overflow: hidden; min-height: 0; }
+.premium-waitlist form { padding: 8px 0 14px; }
+.premium-waitlist__field { display: block; margin-bottom: 18px; }
+.premium-waitlist__field span { font-size: 10px; letter-spacing: .06em; color: rgb(255 255 255 / 70%); }
+.premium-waitlist__field input {
+  display: block;
+  width: 100%;
+  min-height: 36px;
+  padding: 4px 0 8px;
+  border: 0;
+  border-bottom: 1px solid rgb(255 255 255 / 25%);
+  border-radius: 0;
+  outline: none;
+  background: transparent;
+  color: #fff;
+  font: 16px var(--font-sans);
+  transition: border-color 200ms;
+}
+.premium-waitlist__field input:focus { border-bottom-color: rgb(255 255 255 / 85%); }
+.premium-waitlist__join {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 30px;
+  min-height: 44px;
+  width: 100%;
+  border-top: 1px solid rgb(255 255 255 / 12%);
+  font-size: 10px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  transition: opacity 200ms;
+}
+.premium-waitlist__join:hover { opacity: .7; }
+.premium-waitlist__join:disabled { opacity: .5; cursor: wait; }
+.premium-waitlist button:focus-visible { outline: 1px solid rgb(255 255 255 / 70%); outline-offset: 2px; }
+.premium-waitlist__confirmation { margin: 0; padding: 0 0 16px; color: rgb(255 255 255 / 75%); font-size: 12px; line-height: 1.7; }
+.premium-waitlist__error { margin: 0 0 14px; font-size: 12px; line-height: 1.6; color: #f4c8b7; }
+.premium-loading-status { transform: translateY(-64px); }
+
+@media (max-height: 700px) {
+  .premium-waitlist { --waitlist-top: max(112px, calc(50svh - 24px)); }
+  .premium-loading-status { transform: translateY(-136px); }
+}
+@media (max-height: 500px) {
+  .premium-loading-status { transform: translateY(-60px); }
+  .premium-loading-status > :first-child { display: none; }
+  .premium-waitlist { --waitlist-top: 220px; }
+  .premium-waitlist:has([data-expanded="true"]) { --waitlist-top: 104px; }
+}
+@media (hover: none) {
+  .premium-waitlist:focus-within { -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .premium-waitlist, .premium-waitlist * { transition: none !important; }
+}

@@ -3,6 +3,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import vpoHeroBg from "@/assets/vpo-hero-bg.jpeg";
 import VersionSelector from "./VersionSelector";
+import PremiumWaitlist from "./vpo/PremiumWaitlist";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -239,7 +240,9 @@ const FrameSequence = () => {
 
   // Premium mode
   return (
-    <div className="relative z-0 overflow-hidden">
+    <>
+    <PremiumWaitlist isLoading={isLoading} />
+    <div id="premium-experience" tabIndex={-1} className="relative z-0 overflow-hidden outline-none">
       <div
         ref={containerRef}
         className="relative h-screen w-full overflow-hidden bg-background"
@@ -247,6 +250,7 @@ const FrameSequence = () => {
         {isLoading ? (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 bg-background">
             <div className="grain-overlay" />
+            <div className="premium-loading-status flex flex-col items-center gap-6 px-6 text-center">
             
             {/* Spinning loader */}
             <div className="relative w-16 h-16">
@@ -270,6 +274,7 @@ const FrameSequence = () => {
               <p className="font-mono text-xs text-muted-foreground/60 tracking-wider">
                 {loadingProgress}%
               </p>
+            </div>
             </div>
           </div>
         ) : images.length === 0 ? (
@@ -302,6 +307,7 @@ const FrameSequence = () => {
         </section>
       )}
     </div>
+    </>
   );
 };
 
