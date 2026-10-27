@@ -32,10 +32,14 @@ const PremiumWaitlist = ({ isLoading }: PremiumWaitlistProps) => {
     wasExpanded.current = expanded;
     if (!expanded || dismissed || status === "success") return;
     if (justLoaded) setArriving(true);
-    if (justOpened || !panelRef.current?.contains(document.activeElement)) {
+    if (!justOpened && !justLoaded) return;
+    // Wait for the expanding panel to become focusable after inert is removed.
+    const frame = window.requestAnimationFrame(() => {
+      if (document.activeElement === nameRef.current || document.activeElement === emailRef.current) return;
       const nextInput = nameRef.current?.value.trim() ? emailRef.current : nameRef.current;
       nextInput?.focus({ preventScroll: true });
-    }
+    });
+    return () => window.cancelAnimationFrame(frame);
   }, [expanded, isLoading, dismissed, status]);
 
   useEffect(() => {
